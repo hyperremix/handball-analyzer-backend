@@ -1,0 +1,15 @@
+app:
+  handler: dist/app.handler
+  events:
+    - httpApi:
+        method: 'GET'
+        path: /{any+}
+    - httpApi:
+        method: 'POST'
+        path: /{any+}
+    - httpApi:
+        method: 'PUT'
+        path: /{any+}
+    - httpApi:
+        method: 'DELETE'
+        path: /{any+}

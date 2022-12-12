@@ -1,0 +1,84 @@
+service: handball-analyzer-backend
+frameworkVersion: '3'
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: eu-central-1
+  stage: prod
+  environment:
+    AWS_S3_PDF_BUCKET: '${self:service}-pdfs-${opt:stage, self:provider.stage}'
+    DYNAMODB_ENDPOINT: ${self:custom.endpoints.dynamodb}
+    DYNAMODB_USE_LOCAL: ${self:custom.database.useLocal.${opt:stage, self:provider.stage}, false}
+    TEAMS_TABLE: '${self:service}-teams-${opt:stage, self:provider.stage}'
+    PLAYERS_TABLE: '${self:service}-players-${opt:stage, self:provider.stage}'
+    GAMES_TABLE: '${self:service}-games-${opt:stage, self:provider.stage}'
+    GAME_EVENTS_TABLE: '${self:service}-gameEvents-${opt:stage, self:provider.stage}'
+  httpApi:
+    cors:
+      allowedOrigins:
+        - '*'
+      allowedHeaders:
+        - Content-Type
+        - Authorization
+  iam:
+    role:
+      statements:
+        - Effect: 'Allow'
+          Action:
+            - s3:GetObject
+            - s3:HeadObject
+          Resource: arn:aws:s3:::${self:provider.environment.AWS_S3_PDF_BUCKET}/*
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource: '*'
+
+plugins:
+  - serverless-dynamodb-local
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    noAuth: true
+    ignoreJWTSignature: true
+    noPrependStageInUrl: true
+  bundle:
+    linting: false
+    excludeFiles: '**/*.spec.ts'
+  dynamodb:
+    start:
+      host: ${self:custom.database.host.${opt:stage, self:provider.stage}, 'localhost'}
+      port: 8000
+      migrate: true
+    stages:
+      - local
+  tableNames:
+    teams: ${self:provider.environment.TEAMS_TABLE}
+    playes: ${self:provider.environment.PLAYERS_TABLE}
+    games: ${self:provider.environment.GAMES_TABLE}
+    gameEvents: ${self:provider.environment.GAME_EVENTS_TABLE}
+  endpoints:
+    dynamodb: 'http://${self:custom.dynamodb.start.host}:${self:custom.dynamodb.start.port}'
+  database:
+    host:
+      local: localhost
+
+package:
+  patterns:
+    - '!**/**'
+    - 'dist/**'
+    - 'node_modules/**'
+    - 'package.json'
+
+functions:
+  - ${file(infrastructure/functions/app.yml)}
+
+resources:
+  - ${file(infrastructure/resources/app.yml)}

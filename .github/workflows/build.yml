@@ -1,0 +1,25 @@
+name: Node.js CI
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{secrets.SERVERLESS_ACCESS_KEY_ID}}
+      AWS_SECRET_ACCESS_KEY: ${{secrets.SERVERLESS_SECRET_ACCESS_KEY}}
+      LOGGER_FORMAT: json
+      NO_COLOR: true
+      TZ: Europe/Berlin
+      AWS_LAMBDA_TIMEOUT_SECONDS: 15
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: yarn
+      - run: yarn lint
+      - run: yarn checkTs
+      - run: yarn build
+      - if: github.ref == 'refs/heads/main'
+        run: yarn deploy
