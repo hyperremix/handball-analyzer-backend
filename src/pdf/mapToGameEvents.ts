@@ -10,14 +10,14 @@ import {
   GameEventType,
   GameEventYellowCard,
   GameScore,
-} from './models';
+} from '../models';
 
 const daytimePattern = /^\d{2}:\d{2}:\d{2}/;
-const scoreRegexp = /\d{1,2}:\d{1,2}/;
+const scoreRegexp = /\d{1,2}:\d{1,2}(?!m)/;
 const playerNumberAndTeamRegexp = /\(\d{1,2}, .*\)/;
 
-export const mapToGameEvents = (game: Game, gameEvents: string[]): GameEvent[] => {
-  return gameEvents.map((gameEvent) => mapToGameEvent(game, gameEvent));
+export const mapToGameEvents = (game: Game, gameEventStrings: string[]): GameEvent[] => {
+  return gameEventStrings.map((gameEventString) => mapToGameEvent(game, gameEventString));
 };
 
 const mapToGameEvent = (game: Game, gameEvent: string): GameEvent => {
@@ -97,21 +97,23 @@ const extractGameEventGoal = (
     throw new Error(`Could not extract score from game event: ${gameEvent}`);
   }
 
-  const [playerNumber, team] = extractPlayerNumberAndTeam(gameEvent);
+  const [playerNumber, shortTeamName] = extractPlayerNumberAndTeam(gameEvent);
   const playerName = gameEvent
     .replace(gameEventIndicatorMap[GameEventType.Goal], '')
     .replace(playerNumberAndTeamRegexp, '')
     .trim();
+  const teamId = getTeamId(game, shortTeamName);
+  const playerId = getPlayerId(teamId, playerNumber, playerName);
 
   return {
     type,
-    id: game.id + type + elapsedSeconds,
+    id: getGameEventId(game, type, elapsedSeconds),
     gameId: game.id,
     daytime,
     elapsedSeconds,
     score,
-    playerId: 'todo',
-    teamId: 'todo',
+    playerId,
+    teamId,
   };
 };
 
@@ -124,24 +126,26 @@ const extractGameEventSevenMeters = (
   score?: GameScore,
 ): GameEventSevenMeters => {
   const isGoal = !gameEvent.includes('KEIN');
-  const [playerNumber, team] = extractPlayerNumberAndTeam(gameEvent);
+  const [playerNumber, shortTeamName] = extractPlayerNumberAndTeam(gameEvent);
   const playerName = gameEvent
     .replace('7m, KEIN', '')
     .replace('7m-', '')
     .replace('Tor durch', '')
     .replace(playerNumberAndTeamRegexp, '')
     .trim();
+  const teamId = getTeamId(game, shortTeamName);
+  const playerId = getPlayerId(teamId, playerNumber, playerName);
 
   return {
     type,
-    id: game.id + type + elapsedSeconds,
+    id: getGameEventId(game, type, elapsedSeconds),
     gameId: game.id,
     daytime,
     elapsedSeconds,
     isGoal,
     score,
-    playerId: 'todo',
-    teamId: 'todo',
+    playerId,
+    teamId,
   };
 };
 
@@ -152,20 +156,22 @@ const extractPenalty = (
   daytime: Date,
   elapsedSeconds: number,
 ): GameEventPenalty => {
-  const [playerNumber, team] = extractPlayerNumberAndTeam(gameEvent);
+  const [playerNumber, shortTeamName] = extractPlayerNumberAndTeam(gameEvent);
   const playerName = gameEvent
     .replace(gameEventIndicatorMap[GameEventType.Penalty], '')
     .replace(playerNumberAndTeamRegexp, '')
     .trim();
+  const teamId = getTeamId(game, shortTeamName);
+  const playerId = getPlayerId(teamId, playerNumber, playerName);
 
   return {
     type,
-    id: game.id + type + elapsedSeconds,
+    id: getGameEventId(game, type, elapsedSeconds),
     gameId: game.id,
     daytime,
     elapsedSeconds,
-    playerId: 'todo',
-    teamId: 'todo',
+    playerId,
+    teamId,
   };
 };
 
@@ -176,15 +182,16 @@ const extractTimeout = (
   daytime: Date,
   elapsedSeconds: number,
 ): GameEventTimeout => {
-  const team = gameEvent.replace(gameEventIndicatorMap[GameEventType.Timeout], '').trim();
+  const shortTeamName = gameEvent.replace(gameEventIndicatorMap[GameEventType.Timeout], '').trim();
+  const teamId = getTeamId(game, shortTeamName);
 
   return {
     type,
-    id: game.id + type + elapsedSeconds,
+    id: getGameEventId(game, type, elapsedSeconds),
     gameId: game.id,
     daytime,
     elapsedSeconds,
-    teamId: 'todo',
+    teamId,
   };
 };
 
@@ -195,21 +202,22 @@ const extractYellowCard = (
   daytime: Date,
   elapsedSeconds: number,
 ): GameEventYellowCard => {
-  const [playerNumber, team] = extractPlayerNumberAndTeam(gameEvent);
-
+  const [playerNumber, shortTeamName] = extractPlayerNumberAndTeam(gameEvent);
   const playerName = gameEvent
     .replace(gameEventIndicatorMap[GameEventType.YellowCard], '')
     .replace(playerNumberAndTeamRegexp, '')
     .trim();
+  const teamId = getTeamId(game, shortTeamName);
+  const playerId = getPlayerId(teamId, playerNumber, playerName);
 
   return {
     type,
-    id: game.id + type + elapsedSeconds,
+    id: getGameEventId(game, type, elapsedSeconds),
     gameId: game.id,
     daytime,
     elapsedSeconds,
-    playerId: 'todo',
-    teamId: 'todo',
+    playerId,
+    teamId,
   };
 };
 
@@ -220,21 +228,22 @@ const extractRedCard = (
   daytime: Date,
   elapsedSeconds: number,
 ): GameEventRedCard => {
-  const [playerNumber, team] = extractPlayerNumberAndTeam(gameEvent);
-
+  const [playerNumber, shortTeamName] = extractPlayerNumberAndTeam(gameEvent);
   const playerName = gameEvent
     .replace(gameEventIndicatorMap[GameEventType.RedCard], '')
     .replace(playerNumberAndTeamRegexp, '')
     .trim();
+  const teamId = getTeamId(game, shortTeamName);
+  const playerId = getPlayerId(teamId, playerNumber, playerName);
 
   return {
     type,
-    id: game.id + type + elapsedSeconds,
+    id: getGameEventId(game, type, elapsedSeconds),
     gameId: game.id,
     daytime,
     elapsedSeconds,
-    playerId: 'todo',
-    teamId: 'todo',
+    playerId,
+    teamId,
   };
 };
 
@@ -277,3 +286,12 @@ const extractPlayerNumberAndTeam = (gameEvent: string): [number, string] => {
     : '';
   return [parseInt(playerAndTeam[0]), playerAndTeam[1]];
 };
+
+const getGameEventId = (game: Game, type: GameEventType, elapsedSeconds: number): string =>
+  game.id + type + elapsedSeconds;
+
+const getTeamId = (game: Game, shortTeamName: string): string =>
+  game.homeTeamId.includes(shortTeamName) ? game.homeTeamId : game.awayTeamId;
+
+const getPlayerId = (teamId: string, playerNumber: number, playerName: string): string =>
+  `${teamId} ${playerNumber} ${playerName}`;

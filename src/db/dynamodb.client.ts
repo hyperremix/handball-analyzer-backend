@@ -1,5 +1,5 @@
 import { DynamoDBDocument, QueryCommandInput, ScanCommandInput } from '@aws-sdk/lib-dynamodb';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Scope } from '@nestjs/common';
 import { marshallDates } from './marshallDates';
 import { TCommandInput } from './TCommandInput';
 import { unmarshallDates } from './unmarshallDates';
@@ -10,7 +10,7 @@ type TItem = {
   id: string;
 };
 
-@Injectable()
+@Injectable({ scope: Scope.TRANSIENT })
 export class DynamoDBClient {
   private tableName = '';
 

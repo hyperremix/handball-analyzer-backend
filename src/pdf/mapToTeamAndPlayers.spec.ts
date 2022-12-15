@@ -1,0 +1,73 @@
+import { mapToTeamAndPlayers } from './mapToTeamAndPlayers';
+
+describe('mapToTeamAndPlayers', () => {
+  describe('when ', () => {
+    it('if  then ', () => {
+      const result = mapToTeamAndPlayers(teamDataStrings, 'M-LL-2');
+      console.log(JSON.stringify(result, null, 2));
+    });
+  });
+
+  const teamDataStrings = [
+    'Heim: HSV/Hamm 02',
+    'Nr.NameJahrgangMR',
+    'Tore',
+    '(ges)',
+    '7m/',
+    'Tore',
+    'Verw.',
+    'Hinausstellungen',
+    '1.2.3.',
+    'Disq.Ber.',
+    'zus.',
+    'Strafe',
+    '7Boriss Garbers29:10',
+    '10Tobias Kahl12/1',
+    '11Ruben Engels5',
+    '12Florian Lorenz',
+    '13Bennet Hoffmann5',
+    '16Oliver Scharr',
+    '20Moritz Hidde41/013:5632:01',
+    '21Gerrit Meyer11/1',
+    '24Klaus Simon',
+    '32paul nielen1',
+    '33Chris Bierenbrodt1',
+    '34Torben Käufer105:4644:40',
+    '35Max Holst334:46',
+    'ASteven Eckardt',
+    'B',
+    'C',
+    'D',
+    'Gast: SC Alstertal-Langenhorn',
+    'Nr.NameJahrgangMR',
+    'Tore',
+    '(ges)',
+    '7m/',
+    'Tore',
+    'Verw.',
+    'Hinausstellungen',
+    '1.2.3.',
+    'Disq.Ber.',
+    'zus.',
+    'Strafe',
+    '2Christoph Saß41/0',
+    '4Torben Drews106:5835:35',
+    '7Mattis David Leich124:2539:34',
+    '12Finjo von Stritzky',
+    '16Richard Telgenkämper',
+    '18Florian Behne3',
+    '19Jorden Wolf',
+    '21Jonas Arvid Ruhnke1',
+    '24Niclas Christoph Göhring306:4719:1153:47',
+    '49Hendrik Lang2',
+    '87Dennis Schmidt2',
+    'ABurkhard Witt',
+    'BChristian Grollmann',
+    'CConny Wolley',
+    'D',
+    'Handball4all AGSeite 2/4Stand vom 14.10.2022, 17:24:31h',
+    '',
+    'Presseinformation - lang',
+    'M-LL-2, Spiel Nr. 15122013 am 11.09.22',
+  ];
+});

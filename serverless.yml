@@ -69,6 +69,8 @@ custom:
   database:
     host:
       local: localhost
+    useLocal:
+      local: true
 
 package:
   patterns:

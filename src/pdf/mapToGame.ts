@@ -1,22 +1,24 @@
-import { Game, GameScore } from './models';
+import { Game, GameScore } from '../models';
 
-export const mapToMetadata = (metadataStrings: string[]): Game => {
+export const mapToGame = (metadataStrings: string[]): Game => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [leagueString, idandDateString, _, homeTeamAndawayTeamString, resultAndwinnerString] =
     metadataStrings;
   const league = extractLeague(leagueString);
   const { id, date } = extractIdAndDate(idandDateString);
-  const { homeTeam, awayTeam } = extractHomeTeamAndAwayTeam(homeTeamAndawayTeamString);
-  const { halftimeScore, fulltimeScore, winner } =
-    extractGameScoresAndWinner(resultAndwinnerString);
+  const { homeTeamId, awayTeamId } = extractHomeTeamAndAwayTeam(homeTeamAndawayTeamString, league);
+  const { halftimeScore, fulltimeScore, winnerTeamId } = extractGameScoresAndWinner(
+    resultAndwinnerString,
+    league,
+  );
 
   return {
     id,
     date,
     league,
-    winner,
-    homeTeam,
-    awayTeam,
+    winnerTeamId,
+    homeTeamId,
+    awayTeamId,
     halftimeScore,
     fulltimeScore,
   };
@@ -54,25 +56,27 @@ const extractIdAndDate = (idAndDateString: string): { id: string; date: Date } =
 
 const extractHomeTeamAndAwayTeam = (
   homeTeamAndAwayTeamString: string,
+  league: string,
 ): {
-  homeTeam: string;
-  awayTeam: string;
+  homeTeamId: string;
+  awayTeamId: string;
 } => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, homeTeamString, awayTeam] = homeTeamAndAwayTeamString.split(' - ');
   const homeTeam = homeTeamString.replace('Gast', '').trim();
   return {
-    homeTeam,
-    awayTeam: awayTeam.trim(),
+    homeTeamId: `${league} ${homeTeam}`,
+    awayTeamId: `${league} ${awayTeam.trim()}`,
   };
 };
 
 const extractGameScoresAndWinner = (
   resultAndWinnerString: string,
+  league: string,
 ): {
   halftimeScore: GameScore;
   fulltimeScore: GameScore;
-  winner: string;
+  winnerTeamId: string;
 } => {
   const [resultString, winnerString] = resultAndWinnerString.split(' , ');
 
@@ -88,7 +92,7 @@ const extractGameScoresAndWinner = (
   const winnerStartString = 'Sieger ';
   const winnerStartIndex = winnerString.indexOf('Sieger ');
   const winnerEndIndex = winnerString.indexOf('Zuschauer');
-  const winner = winnerString
+  const winnerTeam = winnerString
     .substring(winnerStartIndex + winnerStartString.length, winnerEndIndex)
     .trim();
 
@@ -101,6 +105,6 @@ const extractGameScoresAndWinner = (
       home: parseInt(fulltimeHomeString),
       away: parseInt(fulltimeAwayString),
     },
-    winner,
+    winnerTeamId: `${league} ${winnerTeam}`,
   };
 };

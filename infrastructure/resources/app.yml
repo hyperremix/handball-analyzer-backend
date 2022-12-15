@@ -1,5 +1,5 @@
 Resources:
-  MachinesBucket:
+  PdfBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: ${self:provider.environment.AWS_S3_PDF_BUCKET}
@@ -9,9 +9,9 @@ Resources:
           - AllowedHeaders: ['*']
             AllowedMethods: ['GET']
             AllowedOrigins: ['*']
-  MachinesBucketPermissions:
+  PdfBucketPermissions:
     Type: AWS::S3::BucketPolicy
-    DependsOn: MachinesBucket
+    DependsOn: PdfBucket
     Properties:
       Bucket: ${self:provider.environment.AWS_S3_PDF_BUCKET}
       PolicyDocument:

@@ -4,9 +4,9 @@ export type Game = {
   id: string;
   date: Date;
   league: string;
-  winner: string;
-  homeTeam: string;
-  awayTeam: string;
+  winnerTeamId: string;
+  homeTeamId: string;
+  awayTeamId: string;
   halftimeScore: GameScore;
   fulltimeScore: GameScore;
 };
