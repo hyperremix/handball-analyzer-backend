@@ -1,49 +1,50 @@
 import { Injectable } from '@nestjs/common';
-import { GameEventsRepository } from 'game-events/game-events.repository';
-import { GamesRepository } from 'games/games.repository';
+import { GameEventsService } from 'game-events/game-events.service';
+import { GamesService } from 'games/games.service';
 import PdfParse from 'pdf-parse';
-import { mapToGameEvents } from 'pdf/mapToGameEvents';
-import { PlayersRepository } from 'players/players.repository';
 import { TeamsService } from 'teams/teams.service';
-import { extractGameStrings } from './extractGameStrings';
-import { mapToGame } from './mapToGame';
-import { mapToTeamAndPlayers } from './mapToTeamAndPlayers';
+
+const daytimePattern = /^\d{2}:\d{2}:\d{2}/;
 
 @Injectable()
 export class PdfService {
   constructor(
-    private gamesRepository: GamesRepository,
-    private gameEventsRepository: GameEventsRepository,
+    private gamesService: GamesService,
+    private gameEventsService: GameEventsService,
     private teamsService: TeamsService,
-    private playersRepository: PlayersRepository,
   ) {}
 
   async parsePdf(pdf: Buffer): Promise<void> {
-    const { metadataStrings, teamDataStrings, gameEventStrings } =
-      await this.extractGameEventStrings(pdf);
-    const game = mapToGame(metadataStrings);
-    const { teams, players } = mapToTeamAndPlayers(teamDataStrings, game.league);
-    const gameEvents = mapToGameEvents(game, gameEventStrings);
+    const { text } = await PdfParse(pdf);
+    const { metadataStrings, teamDataStrings, gameEventStrings } = this.extractGameStrings(text);
 
-    await this.gamesRepository.upsert(game);
-
-    this.teamsService.upsertTeams(teams);
-
-    for (const player of players) {
-      await this.playersRepository.upsert(player);
-    }
-
-    for (const gameEvent of gameEvents) {
-      await this.gameEventsRepository.upsert(gameEvent);
-    }
+    const game = await this.gamesService.createGame(metadataStrings);
+    await this.teamsService.createManyTeams(game, teamDataStrings);
+    await this.gameEventsService.createManyGameEvents(game, gameEventStrings);
   }
 
-  private async extractGameEventStrings(pdf: Buffer): Promise<{
+  private extractGameStrings(pdfText: string): {
     metadataStrings: string[];
     teamDataStrings: string[];
     gameEventStrings: string[];
-  }> {
-    const { text } = await PdfParse(pdf);
-    return extractGameStrings(text);
+  } {
+    const lines = pdfText.split('\n');
+
+    const metadataStartIndex = lines.findIndex((line) => line.includes('Übersicht Spieldaten'));
+    const metadataEndIndex = lines.findIndex((line) => line.includes('Schiedsrichter'));
+    const metadataStrings = lines.slice(metadataStartIndex + 1, metadataEndIndex);
+
+    const teamDataStartIndex = lines.findIndex((line) => line.includes('Mannschaftslisten'));
+    const teamDataEndIndex = lines.findIndex((line) =>
+      line.includes('ZeitSpielzeitSpielstandAktion'),
+    );
+    const teamDataStrings = lines.slice(teamDataStartIndex + 1, teamDataEndIndex - 1);
+    const gameEventStrings = lines.slice(teamDataEndIndex + 1, lines.length);
+
+    return {
+      metadataStrings,
+      teamDataStrings,
+      gameEventStrings: gameEventStrings.filter((line) => line.match(daytimePattern)),
+    };
   }
 }

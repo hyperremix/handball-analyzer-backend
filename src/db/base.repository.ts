@@ -9,6 +9,10 @@ export abstract class BaseRepository<T extends { id: string }> {
     return await this.dynamoDBClient.put(item);
   }
 
+  async upsertMany(items: T[]): Promise<void> {
+    await this.dynamoDBClient.batchPut(items);
+  }
+
   async findOne(filter: Partial<T> = {}): Promise<T | undefined> {
     const items = await this.findMany(filter);
 
