@@ -27,6 +27,7 @@ export class ConfigService {
         players: this.get('PLAYERS_TABLE'),
         games: this.get('GAMES_TABLE'),
         gameEvents: this.get('GAME_EVENTS_TABLE'),
+        leagues: this.get('LEAGUES_TABLE'),
       },
     };
   }

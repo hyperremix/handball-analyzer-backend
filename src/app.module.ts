@@ -9,6 +9,7 @@ import { GamesModule } from './games/games.module';
 import { PdfModule } from './pdf/pdf.module';
 import { PlayersModule } from './players/players.module';
 import { TeamsModule } from './teams/teams.module';
+import { LeaguesModule } from './leagues/leagues.module';
 
 @Module({
   providers: [
@@ -26,6 +27,7 @@ import { TeamsModule } from './teams/teams.module';
     PlayersModule,
     GamesModule,
     GameEventsModule,
+    LeaguesModule,
   ],
 })
 export class AppModule {}

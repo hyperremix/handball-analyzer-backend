@@ -21,6 +21,7 @@ import { TEnvironmentVariables } from './TEnvironmentVariables';
         PLAYERS_TABLE: Joi.string().required(),
         GAMES_TABLE: Joi.string().required(),
         GAME_EVENTS_TABLE: Joi.string().required(),
+        LEAGUES_TABLE: Joi.string().required(),
         LOGGER_FORMAT: Joi.string()
           .valid(...Object.values(LoggerFormat))
           .default(LoggerFormat.string),

@@ -10,5 +10,6 @@ export * from './GameEventTimeout';
 export * from './GameEventType';
 export * from './GameEventYellowCard';
 export * from './GameScore';
+export * from './League';
 export * from './Player';
 export * from './Team';
