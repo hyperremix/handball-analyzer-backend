@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import {
-  Game,
   GameEvent,
   GameEventGoal,
   gameEventIndicatorMap,
@@ -10,6 +9,7 @@ import {
   GameEventTimeout,
   GameEventType,
   GameEventYellowCard,
+  GameMetadata,
   GameScore,
 } from 'models';
 
@@ -19,12 +19,14 @@ const playerNumberAndTeamRegexp = /\(\d{1,2}, .*\)/;
 
 @Injectable()
 export class GameEventsFactory {
-  createMany(game: Game, gameEventStrings: string[]): GameEvent[] {
-    return gameEventStrings.map((gameEventString: any) => this.create(game, gameEventString));
+  createMany(gameMetadata: GameMetadata, gameEventStrings: string[]): GameEvent[] {
+    return gameEventStrings.map((gameEventString: any) =>
+      this.create(gameMetadata, gameEventString),
+    );
   }
 
-  create(game: Game, gameEvent: string): GameEvent {
-    const daytime = this.createDaytime(game.date, gameEvent);
+  create(gameMetadata: GameMetadata, gameEvent: string): GameEvent {
+    const daytime = this.createDaytime(gameMetadata.date, gameEvent);
     const eventWithoutDaytime = gameEvent.replace(daytimePattern, '').trim();
     const elapsedSeconds = this.createElapsedSeconds(eventWithoutDaytime.substring(0, 5));
     const eventWithoutTime = eventWithoutDaytime.substring(5, eventWithoutDaytime.length).trim();
@@ -35,7 +37,7 @@ export class GameEventsFactory {
       const gameEventType = key as GameEventType;
       const indicator = value;
       const gameEvent = this.createGameEvent(
-        game,
+        gameMetadata,
         eventWithoutTimeAndScore,
         gameEventType,
         indicator,
@@ -52,7 +54,7 @@ export class GameEventsFactory {
   }
 
   private createGameEvent = (
-    game: Game,
+    gameMetadata: GameMetadata,
     gameEvent: string,
     gameEventType: GameEventType,
     indicator: string,
@@ -68,7 +70,7 @@ export class GameEventsFactory {
     switch (gameEventType) {
       case GameEventType.Goal:
         return this.createGameEventGoal(
-          game,
+          gameMetadata,
           gameEventType,
           gameEvent,
           daytime,
@@ -77,7 +79,7 @@ export class GameEventsFactory {
         );
       case GameEventType.SevenMeters:
         return this.createGameEventSevenMeters(
-          game,
+          gameMetadata,
           gameEventType,
           gameEvent,
           daytime,
@@ -85,18 +87,24 @@ export class GameEventsFactory {
           score,
         );
       case GameEventType.Penalty:
-        return this.createPenalty(game, gameEventType, gameEvent, daytime, elapsedSeconds);
+        return this.createPenalty(gameMetadata, gameEventType, gameEvent, daytime, elapsedSeconds);
       case GameEventType.Timeout:
-        return this.createTimeout(game, gameEventType, gameEvent, daytime, elapsedSeconds);
+        return this.createTimeout(gameMetadata, gameEventType, gameEvent, daytime, elapsedSeconds);
       case GameEventType.YellowCard:
-        return this.createYellowCard(game, gameEventType, gameEvent, daytime, elapsedSeconds);
+        return this.createYellowCard(
+          gameMetadata,
+          gameEventType,
+          gameEvent,
+          daytime,
+          elapsedSeconds,
+        );
       case GameEventType.RedCard:
-        return this.createRedCard(game, gameEventType, gameEvent, daytime, elapsedSeconds);
+        return this.createRedCard(gameMetadata, gameEventType, gameEvent, daytime, elapsedSeconds);
     }
   };
 
   private createGameEventGoal = (
-    game: Game,
+    gameMetadata: GameMetadata,
     type: GameEventType.Goal,
     gameEvent: string,
     daytime: Date,
@@ -112,13 +120,13 @@ export class GameEventsFactory {
       .replace(gameEventIndicatorMap[GameEventType.Goal], '')
       .replace(playerNumberAndTeamRegexp, '')
       .trim();
-    const teamId = this.getTeamId(game, shortTeamName);
+    const teamId = this.getTeamId(gameMetadata, shortTeamName);
     const playerId = this.getPlayerId(teamId, playerNumber, playerName);
 
     return {
       type,
-      id: this.getGameEventId(game, type, elapsedSeconds),
-      gameId: game.id,
+      id: this.getGameEventId(gameMetadata, type, elapsedSeconds),
+      gameId: gameMetadata.id,
       daytime,
       elapsedSeconds,
       score,
@@ -128,7 +136,7 @@ export class GameEventsFactory {
   };
 
   private createGameEventSevenMeters = (
-    game: Game,
+    gameMetadata: GameMetadata,
     type: GameEventType.SevenMeters,
     gameEvent: string,
     daytime: Date,
@@ -143,13 +151,13 @@ export class GameEventsFactory {
       .replace('Tor durch', '')
       .replace(playerNumberAndTeamRegexp, '')
       .trim();
-    const teamId = this.getTeamId(game, shortTeamName);
+    const teamId = this.getTeamId(gameMetadata, shortTeamName);
     const playerId = this.getPlayerId(teamId, playerNumber, playerName);
 
     return {
       type,
-      id: this.getGameEventId(game, type, elapsedSeconds),
-      gameId: game.id,
+      id: this.getGameEventId(gameMetadata, type, elapsedSeconds),
+      gameId: gameMetadata.id,
       daytime,
       elapsedSeconds,
       isGoal,
@@ -160,7 +168,7 @@ export class GameEventsFactory {
   };
 
   private createPenalty = (
-    game: Game,
+    gameMetadata: GameMetadata,
     type: GameEventType.Penalty,
     gameEvent: string,
     daytime: Date,
@@ -171,13 +179,13 @@ export class GameEventsFactory {
       .replace(gameEventIndicatorMap[GameEventType.Penalty], '')
       .replace(playerNumberAndTeamRegexp, '')
       .trim();
-    const teamId = this.getTeamId(game, shortTeamName);
+    const teamId = this.getTeamId(gameMetadata, shortTeamName);
     const playerId = this.getPlayerId(teamId, playerNumber, playerName);
 
     return {
       type,
-      id: this.getGameEventId(game, type, elapsedSeconds),
-      gameId: game.id,
+      id: this.getGameEventId(gameMetadata, type, elapsedSeconds),
+      gameId: gameMetadata.id,
       daytime,
       elapsedSeconds,
       playerId,
@@ -186,7 +194,7 @@ export class GameEventsFactory {
   };
 
   private createTimeout = (
-    game: Game,
+    gameMetadata: GameMetadata,
     type: GameEventType.Timeout,
     gameEvent: string,
     daytime: Date,
@@ -195,12 +203,12 @@ export class GameEventsFactory {
     const shortTeamName = gameEvent
       .replace(gameEventIndicatorMap[GameEventType.Timeout], '')
       .trim();
-    const teamId = this.getTeamId(game, shortTeamName);
+    const teamId = this.getTeamId(gameMetadata, shortTeamName);
 
     return {
       type,
-      id: this.getGameEventId(game, type, elapsedSeconds),
-      gameId: game.id,
+      id: this.getGameEventId(gameMetadata, type, elapsedSeconds),
+      gameId: gameMetadata.id,
       daytime,
       elapsedSeconds,
       teamId,
@@ -208,7 +216,7 @@ export class GameEventsFactory {
   };
 
   private createYellowCard = (
-    game: Game,
+    gameMetadata: GameMetadata,
     type: GameEventType.YellowCard,
     gameEvent: string,
     daytime: Date,
@@ -219,13 +227,13 @@ export class GameEventsFactory {
       .replace(gameEventIndicatorMap[GameEventType.YellowCard], '')
       .replace(playerNumberAndTeamRegexp, '')
       .trim();
-    const teamId = this.getTeamId(game, shortTeamName);
+    const teamId = this.getTeamId(gameMetadata, shortTeamName);
     const playerId = this.getPlayerId(teamId, playerNumber, playerName);
 
     return {
       type,
-      id: this.getGameEventId(game, type, elapsedSeconds),
-      gameId: game.id,
+      id: this.getGameEventId(gameMetadata, type, elapsedSeconds),
+      gameId: gameMetadata.id,
       daytime,
       elapsedSeconds,
       playerId,
@@ -234,7 +242,7 @@ export class GameEventsFactory {
   };
 
   private createRedCard = (
-    game: Game,
+    gameMetadata: GameMetadata,
     type: GameEventType.RedCard,
     gameEvent: string,
     daytime: Date,
@@ -245,13 +253,13 @@ export class GameEventsFactory {
       .replace(gameEventIndicatorMap[GameEventType.RedCard], '')
       .replace(playerNumberAndTeamRegexp, '')
       .trim();
-    const teamId = this.getTeamId(game, shortTeamName);
+    const teamId = this.getTeamId(gameMetadata, shortTeamName);
     const playerId = this.getPlayerId(teamId, playerNumber, playerName);
 
     return {
       type,
-      id: this.getGameEventId(game, type, elapsedSeconds),
-      gameId: game.id,
+      id: this.getGameEventId(gameMetadata, type, elapsedSeconds),
+      gameId: gameMetadata.id,
       daytime,
       elapsedSeconds,
       playerId,
@@ -299,11 +307,16 @@ export class GameEventsFactory {
     return [parseInt(playerAndTeam[0]), playerAndTeam[1]];
   };
 
-  private getGameEventId = (game: Game, type: GameEventType, elapsedSeconds: number): string =>
-    game.id + type + elapsedSeconds;
+  private getGameEventId = (
+    gameMetadata: GameMetadata,
+    type: GameEventType,
+    elapsedSeconds: number,
+  ): string => gameMetadata.id + type + elapsedSeconds;
 
-  private getTeamId = (game: Game, shortTeamName: string): string =>
-    game.homeTeamId.includes(shortTeamName) ? game.homeTeamId : game.awayTeamId;
+  private getTeamId = (gameMetadata: GameMetadata, shortTeamName: string): string =>
+    gameMetadata.homeTeamId.includes(shortTeamName)
+      ? gameMetadata.homeTeamId
+      : gameMetadata.awayTeamId;
 
   private getPlayerId = (teamId: string, playerNumber: number, playerName: string): string =>
     `${teamId} ${playerNumber} ${playerName}`;

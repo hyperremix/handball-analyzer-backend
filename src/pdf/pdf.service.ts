@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { GameEventsService } from 'game-events/game-events.service';
+import { GameMetadataFactory } from 'games/game-metadata.factory';
 import { GamesService } from 'games/games.service';
 import { LeaguesService } from 'leagues/leagues.service';
 import PdfParse from 'pdf-parse';
@@ -14,16 +15,18 @@ export class PdfService {
     private gameEventsService: GameEventsService,
     private teamsService: TeamsService,
     private leaguesService: LeaguesService,
+    private gameMetadataFactory: GameMetadataFactory,
   ) {}
 
   async parsePdf(pdf: Buffer): Promise<void> {
     const { text } = await PdfParse(pdf);
     const { metadataStrings, teamDataStrings, gameEventStrings } = this.extractGameStrings(text);
 
+    const gameMetadata = this.gameMetadataFactory.create(metadataStrings);
+    const game = await this.gamesService.createGame(gameMetadata, metadataStrings);
+    await this.gameEventsService.createManyGameEvents(gameEventStrings, gameMetadata);
     await this.leaguesService.createLeague(metadataStrings);
-    const game = await this.gamesService.createGame(metadataStrings);
     await this.teamsService.createManyTeams(game, teamDataStrings);
-    await this.gameEventsService.createManyGameEvents(game, gameEventStrings);
   }
 
   private extractGameStrings(pdfText: string): {

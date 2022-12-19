@@ -3,7 +3,7 @@ import { GameScore } from './GameScore';
 export type Game = {
   id: string;
   date: Date;
-  league: string;
+  leagueId: string;
   winnerTeamId: string;
   homeTeamId: string;
   awayTeamId: string;

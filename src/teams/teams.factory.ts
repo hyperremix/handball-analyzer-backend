@@ -31,10 +31,10 @@ export class TeamsFactory {
 
     const homeCoaches = this.mapToCoaches(homeCoachesStrings);
     const awayCoaches = this.mapToCoaches(awayCoachesStrings);
-    const homeTeam = this.mapToTeam(homeTeamString, game.league, homeCoaches);
-    const awayTeam = this.mapToTeam(awayTeamString, game.league, awayCoaches);
-    const homePlayers = this.mapToManyPlayers(homePlayerStrings, homeTeam.id);
-    const awayPlayers = this.mapToManyPlayers(awayPlayerStrings, awayTeam.id);
+    const homeTeam = this.mapToTeam(homeTeamString, game.leagueId, homeCoaches);
+    const awayTeam = this.mapToTeam(awayTeamString, game.leagueId, awayCoaches);
+    const homePlayers = this.mapToManyPlayers(homePlayerStrings, homeTeam.id, game.leagueId);
+    const awayPlayers = this.mapToManyPlayers(awayPlayerStrings, awayTeam.id, game.leagueId);
 
     return {
       teams: [homeTeam, awayTeam],
@@ -45,21 +45,22 @@ export class TeamsFactory {
   mapToCoaches = (coachesStrings: string[]): string[] =>
     coachesStrings.map((coachString) => coachString.slice(1)).filter((coach) => coach !== '');
 
-  mapToTeam = (teamString: string, league: string, coaches: string[]): Team => {
+  mapToTeam = (teamString: string, leagueId: string, coaches: string[]): Team => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [_, name] = teamString.split(': ');
 
     return {
-      id: `${league} ${name}`,
+      id: `${leagueId} ${name}`,
+      leagueId,
       name,
       coaches,
     };
   };
 
-  mapToManyPlayers = (playerStrings: string[], teamId: string): Player[] =>
-    playerStrings.map((playerString) => this.mapToPlayer(playerString, teamId));
+  mapToManyPlayers = (playerStrings: string[], teamId: string, leagueId: string): Player[] =>
+    playerStrings.map((playerString) => this.mapToPlayer(playerString, teamId, leagueId));
 
-  mapToPlayer = (playerString: string, teamId: string): Player => {
+  mapToPlayer = (playerString: string, teamId: string, leagueId: string): Player => {
     const playerNumberRegex = /^\d{1,2}/;
     const playerNameRegex = /[^\d:/]+/;
 
@@ -70,6 +71,7 @@ export class TeamsFactory {
 
     return {
       id: `${teamId} ${number} ${name}`,
+      leagueId,
       teamId,
       name,
       number,

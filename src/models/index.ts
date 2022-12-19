@@ -9,6 +9,7 @@ export * from './GameEventSevenMeters';
 export * from './GameEventTimeout';
 export * from './GameEventType';
 export * from './GameEventYellowCard';
+export * from './GameMetadata';
 export * from './GameScore';
 export * from './League';
 export * from './Player';

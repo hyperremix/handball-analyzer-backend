@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Game, GameEvent } from 'models';
+import { GameEvent, GameMetadata } from 'models';
 import { GameEventsFactory } from './game-events.factory';
 import { GameEventsRepository } from './game-events.repository';
 
@@ -10,8 +10,11 @@ export class GameEventsService {
     private gameEventsRepository: GameEventsRepository,
   ) {}
 
-  async createManyGameEvents(game: Game, gameEventStrings: string[]): Promise<GameEvent[]> {
-    const gameEvents = this.gameEventsFactory.createMany(game, gameEventStrings);
+  async createManyGameEvents(
+    gameEventStrings: string[],
+    gameMetadata: GameMetadata,
+  ): Promise<GameEvent[]> {
+    const gameEvents = this.gameEventsFactory.createMany(gameMetadata, gameEventStrings);
 
     await this.gameEventsRepository.upsertMany(gameEvents);
 
