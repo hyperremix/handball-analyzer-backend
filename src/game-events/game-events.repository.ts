@@ -1,11 +1,15 @@
+import { GameEvent } from '@model';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from 'config';
 import { BaseRepository, DynamoDBClient } from 'db';
-import { GameEvent } from 'models';
 
 @Injectable()
 export class GameEventsRepository extends BaseRepository<GameEvent> {
-  constructor(dynamoDBClient: DynamoDBClient, configService: ConfigService) {
+  constructor(dynamoDBClient: DynamoDBClient, private configService: ConfigService) {
     super(dynamoDBClient, configService.db.tables.gameEvents);
+  }
+
+  async findManyByLeagueId(leagueId: string): Promise<GameEvent[]> {
+    return await super.query({ leagueId }, this.configService.db.indices.leagueId);
   }
 }

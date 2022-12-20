@@ -1,5 +1,5 @@
+import { League } from '@model';
 import { Injectable } from '@nestjs/common';
-import { League } from 'models';
 import { LeaguesFactory } from './leagues.factory';
 import { LeaguesRepository } from './leagues.repository';
 
@@ -10,8 +10,8 @@ export class LeaguesService {
     private leaguesRepository: LeaguesRepository,
   ) {}
 
-  createLeague(metadataStrings: string[]): Promise<League> {
-    const league = this.leaguesFactory.create(metadataStrings);
+  createLeague(gameDate: Date, metadataStrings: string[]): Promise<League> {
+    const league = this.leaguesFactory.create(gameDate, metadataStrings);
     return this.leaguesRepository.upsert(league);
   }
 }

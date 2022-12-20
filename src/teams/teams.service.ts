@@ -1,45 +1,47 @@
+import { Team } from '@model';
 import { Injectable } from '@nestjs/common';
-import { Game, Player, Team } from 'models';
-import { PlayersService } from 'players/players.service';
 import { TeamsFactory } from './teams.factory';
 import { TeamsRepository } from './teams.repository';
 
 @Injectable()
 export class TeamsService {
-  constructor(
-    private teamsFactory: TeamsFactory,
-    private teamsRepository: TeamsRepository,
-    private playersService: PlayersService,
-  ) {}
+  constructor(private teamsFactory: TeamsFactory, private teamsRepository: TeamsRepository) {}
 
-  async createManyTeams(
-    game: Game,
-    teamDataString: string[],
-  ): Promise<{ teams: Team[]; players: Player[] }> {
-    const { teams, players } = this.teamsFactory.createMany(game, teamDataString);
+  async createManyTeams(leagueId: string, teamDataString: string[]): Promise<Team[]> {
+    const teams = this.teamsFactory.createMany(leagueId, teamDataString);
 
     const existingTeams = await this.teamsRepository.findMany();
 
     const mergedTeams = this.mergeTeams(teams, existingTeams);
     await this.teamsRepository.upsertMany(mergedTeams);
-    await this.playersService.upsertMany(players);
 
-    return { teams: mergedTeams, players };
+    return mergedTeams;
   }
 
   private mergeTeams(teams: Team[], existingTeams: Team[]): Team[] {
     return teams.map((team) => {
       const existingTeam = existingTeams.find((existingTeam) => existingTeam.id === team.id);
 
-      return existingTeam
-        ? {
-            ...team,
-            coaches: [
-              ...existingTeam.coaches,
-              ...team.coaches.filter((coach) => !existingTeam.coaches.includes(coach)),
-            ],
-          }
-        : team;
+      return this.mergeTeam(team, existingTeam);
     });
+  }
+
+  private mergeTeam(team: Team, existingTeam?: Team): Team {
+    return existingTeam
+      ? {
+          ...team,
+          coaches: [
+            ...existingTeam.coaches,
+            ...team.coaches.filter((coach) => !existingTeam.coaches.includes(coach)),
+          ],
+          players: [
+            ...existingTeam.players,
+            ...team.players.filter(
+              (player) =>
+                !existingTeam.players.some((existingPlayer) => existingPlayer.id === player.id),
+            ),
+          ],
+        }
+      : team;
   }
 }

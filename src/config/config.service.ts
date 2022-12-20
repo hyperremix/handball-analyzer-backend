@@ -24,10 +24,12 @@ export class ConfigService {
       useLocal: this.get('DYNAMODB_USE_LOCAL'),
       tables: {
         teams: this.get('TEAMS_TABLE'),
-        players: this.get('PLAYERS_TABLE'),
         games: this.get('GAMES_TABLE'),
         gameEvents: this.get('GAME_EVENTS_TABLE'),
         leagues: this.get('LEAGUES_TABLE'),
+      },
+      indices: {
+        leagueId: this.get('LEAGUE_ID_INDEX'),
       },
     };
   }

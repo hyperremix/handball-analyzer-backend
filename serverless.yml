@@ -12,10 +12,10 @@ provider:
     DYNAMODB_ENDPOINT: ${self:custom.endpoints.dynamodb}
     DYNAMODB_USE_LOCAL: ${self:custom.database.useLocal.${opt:stage, self:provider.stage}, false}
     TEAMS_TABLE: '${self:service}-teams-${opt:stage, self:provider.stage}'
-    PLAYERS_TABLE: '${self:service}-players-${opt:stage, self:provider.stage}'
     GAMES_TABLE: '${self:service}-games-${opt:stage, self:provider.stage}'
     GAME_EVENTS_TABLE: '${self:service}-gameEvents-${opt:stage, self:provider.stage}'
     LEAGUES_TABLE: '${self:service}-leagues-${opt:stage, self:provider.stage}'
+    LEAGUE_ID_INDEX: 'leagueId-index'
   httpApi:
     cors:
       allowedOrigins:
@@ -60,12 +60,6 @@ custom:
       migrate: true
     stages:
       - local
-  tableNames:
-    teams: ${self:provider.environment.TEAMS_TABLE}
-    playes: ${self:provider.environment.PLAYERS_TABLE}
-    games: ${self:provider.environment.GAMES_TABLE}
-    gameEvents: ${self:provider.environment.GAME_EVENTS_TABLE}
-    leagues: ${self:provider.environment.LEAGUES_TABLE}
   endpoints:
     dynamodb: 'http://${self:custom.dynamodb.start.host}:${self:custom.dynamodb.start.port}'
   database:

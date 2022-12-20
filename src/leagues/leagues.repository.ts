@@ -1,7 +1,7 @@
+import { League } from '@model';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from 'config';
 import { BaseRepository, DynamoDBClient } from 'db';
-import { League } from 'models';
 
 @Injectable()
 export class LeaguesRepository extends BaseRepository<League> {

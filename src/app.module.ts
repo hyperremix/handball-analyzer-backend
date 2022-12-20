@@ -6,10 +6,9 @@ import { ErrorInterceptor } from 'errors/error.interceptor';
 import { LoggerModule } from 'logger';
 import { GameEventsModule } from './game-events/game-events.module';
 import { GamesModule } from './games/games.module';
-import { PdfModule } from './pdf/pdf.module';
-import { PlayersModule } from './players/players.module';
-import { TeamsModule } from './teams/teams.module';
 import { LeaguesModule } from './leagues/leagues.module';
+import { PdfModule } from './pdf/pdf.module';
+import { TeamsModule } from './teams/teams.module';
 
 @Module({
   providers: [
@@ -24,7 +23,6 @@ import { LeaguesModule } from './leagues/leagues.module';
     DbModule,
     PdfModule,
     TeamsModule,
-    PlayersModule,
     GamesModule,
     GameEventsModule,
     LeaguesModule,

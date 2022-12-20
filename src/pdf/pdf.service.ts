@@ -23,10 +23,11 @@ export class PdfService {
     const { metadataStrings, teamDataStrings, gameEventStrings } = this.extractGameStrings(text);
 
     const gameMetadata = this.gameMetadataFactory.create(metadataStrings);
-    const game = await this.gamesService.createGame(gameMetadata, metadataStrings);
-    await this.gameEventsService.createManyGameEvents(gameEventStrings, gameMetadata);
-    await this.leaguesService.createLeague(metadataStrings);
-    await this.teamsService.createManyTeams(game, teamDataStrings);
+    const league = await this.leaguesService.createLeague(gameMetadata.date, metadataStrings);
+    const game = await this.gamesService.createGame(league.id, gameMetadata, metadataStrings);
+
+    await this.gameEventsService.createManyGameEvents(gameEventStrings, game);
+    await this.teamsService.createManyTeams(league.id, teamDataStrings);
   }
 
   private extractGameStrings(pdfText: string): {

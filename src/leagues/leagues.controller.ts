@@ -1,5 +1,5 @@
+import { League } from '@model';
 import { Controller, Get } from '@nestjs/common';
-import { League } from 'models';
 import { LeaguesRepository } from './leagues.repository';
 
 @Controller('leagues')

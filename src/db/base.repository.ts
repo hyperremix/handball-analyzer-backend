@@ -27,6 +27,10 @@ export abstract class BaseRepository<T extends { id: string }> {
     return await this.dynamoDBClient.scan(filter);
   }
 
+  async query(query: Partial<T>, indexName?: string, filter: Partial<T> = {}): Promise<T[]> {
+    return await this.dynamoDBClient.query(query, indexName, filter);
+  }
+
   async deleteById(id: string): Promise<void> {
     await this.dynamoDBClient.delete(id);
   }

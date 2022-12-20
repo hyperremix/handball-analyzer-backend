@@ -1,9 +1,10 @@
+import { Player, Team } from '@model';
 import { Injectable } from '@nestjs/common';
-import { Game, Player, Team } from 'models';
+import getUuidByString from 'uuid-by-string';
 
 @Injectable()
 export class TeamsFactory {
-  createMany(game: Game, teamDataStrings: string[]): { teams: Team[]; players: Player[] } {
+  createMany(leagueId: string, teamDataStrings: string[]): Team[] {
     const homeTeamStartIndex = teamDataStrings.findIndex((line) => line.includes('Heim'));
     const homeTeamEndIndex = teamDataStrings.findIndex((line) => line.includes('Gast'));
     const homeTeamStrings = teamDataStrings.slice(homeTeamStartIndex, homeTeamEndIndex);
@@ -31,15 +32,15 @@ export class TeamsFactory {
 
     const homeCoaches = this.mapToCoaches(homeCoachesStrings);
     const awayCoaches = this.mapToCoaches(awayCoachesStrings);
-    const homeTeam = this.mapToTeam(homeTeamString, game.leagueId, homeCoaches);
-    const awayTeam = this.mapToTeam(awayTeamString, game.leagueId, awayCoaches);
-    const homePlayers = this.mapToManyPlayers(homePlayerStrings, homeTeam.id, game.leagueId);
-    const awayPlayers = this.mapToManyPlayers(awayPlayerStrings, awayTeam.id, game.leagueId);
+    const homeTeam = this.mapToTeam(homeTeamString, leagueId, homeCoaches);
+    const awayTeam = this.mapToTeam(awayTeamString, leagueId, awayCoaches);
+    const homePlayers = this.mapToManyPlayers(homePlayerStrings, homeTeam.id);
+    const awayPlayers = this.mapToManyPlayers(awayPlayerStrings, awayTeam.id);
 
-    return {
-      teams: [homeTeam, awayTeam],
-      players: [...homePlayers, ...awayPlayers],
-    };
+    homeTeam.players = homePlayers;
+    awayTeam.players = awayPlayers;
+
+    return [homeTeam, awayTeam];
   }
 
   mapToCoaches = (coachesStrings: string[]): string[] =>
@@ -50,17 +51,18 @@ export class TeamsFactory {
     const [_, name] = teamString.split(': ');
 
     return {
-      id: `${leagueId} ${name}`,
+      id: getUuidByString(`${leagueId} ${name}`),
       leagueId,
       name,
       coaches,
+      players: [],
     };
   };
 
-  mapToManyPlayers = (playerStrings: string[], teamId: string, leagueId: string): Player[] =>
-    playerStrings.map((playerString) => this.mapToPlayer(playerString, teamId, leagueId));
+  mapToManyPlayers = (playerStrings: string[], teamId: string): Player[] =>
+    playerStrings.map((playerString) => this.mapToPlayer(playerString, teamId));
 
-  mapToPlayer = (playerString: string, teamId: string, leagueId: string): Player => {
+  mapToPlayer = (playerString: string, teamId: string): Player => {
     const playerNumberRegex = /^\d{1,2}/;
     const playerNameRegex = /[^\d:/]+/;
 
@@ -70,9 +72,7 @@ export class TeamsFactory {
     const name = nameMatch ? nameMatch[0] : 'N/A';
 
     return {
-      id: `${teamId} ${number} ${name}`,
-      leagueId,
-      teamId,
+      id: getUuidByString(`${teamId} ${number} ${name}`),
       name,
       number,
     };

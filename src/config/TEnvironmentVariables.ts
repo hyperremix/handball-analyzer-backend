@@ -8,9 +8,9 @@ export type TEnvironmentVariables = {
   DYNAMODB_ENDPOINT: string;
   DYNAMODB_USE_LOCAL: boolean;
   TEAMS_TABLE: string;
-  PLAYERS_TABLE: string;
   GAMES_TABLE: string;
   GAME_EVENTS_TABLE: string;
   LEAGUES_TABLE: string;
+  LEAGUE_ID_INDEX: string;
   LOGGER_FORMAT: LoggerFormat;
 };

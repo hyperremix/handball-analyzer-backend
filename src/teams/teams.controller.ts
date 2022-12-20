@@ -1,5 +1,5 @@
-import { Controller, Get } from '@nestjs/common';
-import { Team } from 'models';
+import { Team } from '@model';
+import { Controller, Get, Query } from '@nestjs/common';
 import { TeamsRepository } from './teams.repository';
 
 @Controller('teams')
@@ -7,7 +7,9 @@ export class TeamsController {
   constructor(private teamsRepository: TeamsRepository) {}
 
   @Get()
-  getTeams(): Promise<Team[]> {
-    return this.teamsRepository.findMany();
+  getTeams(@Query('leagueId') leagueId?: string): Promise<Team[]> {
+    return leagueId
+      ? this.teamsRepository.findManyByLeagueId(leagueId)
+      : this.teamsRepository.findMany();
   }
 }
