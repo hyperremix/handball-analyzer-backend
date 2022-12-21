@@ -10,6 +10,7 @@ import {
   GameEventType,
   GameEventYellowCard,
   GameScore,
+  TeamMetadata,
 } from '@model';
 import { Injectable } from '@nestjs/common';
 import getUuidByString from 'uuid-by-string';
@@ -20,11 +21,23 @@ const playerNumberAndTeamRegexp = /\(\d{1,2}, .*\)/;
 
 @Injectable()
 export class GameEventsFactory {
-  createMany(game: Game, gameEventStrings: string[]): GameEvent[] {
-    return gameEventStrings.map((gameEventString: any) => this.create(game, gameEventString));
+  createMany(
+    game: Game,
+    homeTeamMetadata: TeamMetadata,
+    awayTeamMetadata: TeamMetadata,
+    gameEventStrings: string[],
+  ): GameEvent[] {
+    return gameEventStrings.map((gameEventString: any) =>
+      this.create(game, homeTeamMetadata, awayTeamMetadata, gameEventString),
+    );
   }
 
-  create(game: Game, gameEvent: string): GameEvent {
+  create(
+    game: Game,
+    homeTeamMetadata: TeamMetadata,
+    awayTeamMetadata: TeamMetadata,
+    gameEvent: string,
+  ): GameEvent {
     const daytime = this.createDaytime(game.date, gameEvent);
     const eventWithoutDaytime = gameEvent.replace(daytimePattern, '').trim();
     const elapsedSeconds = this.createElapsedSeconds(eventWithoutDaytime.substring(0, 5));
@@ -37,6 +50,8 @@ export class GameEventsFactory {
       const indicator = value;
       const gameEvent = this.createGameEvent(
         game,
+        homeTeamMetadata,
+        awayTeamMetadata,
         eventWithoutTimeAndScore,
         gameEventType,
         indicator,
@@ -54,6 +69,8 @@ export class GameEventsFactory {
 
   private createGameEvent = (
     game: Game,
+    homeTeamMetadata: TeamMetadata,
+    awayTeamMetadata: TeamMetadata,
     gameEvent: string,
     gameEventType: GameEventType,
     indicator: string,
@@ -70,6 +87,8 @@ export class GameEventsFactory {
       case GameEventType.Goal:
         return this.createGameEventGoal(
           game,
+          homeTeamMetadata,
+          awayTeamMetadata,
           gameEventType,
           gameEvent,
           daytime,
@@ -79,6 +98,8 @@ export class GameEventsFactory {
       case GameEventType.SevenMeters:
         return this.createGameEventSevenMeters(
           game,
+          homeTeamMetadata,
+          awayTeamMetadata,
           gameEventType,
           gameEvent,
           daytime,
@@ -86,18 +107,52 @@ export class GameEventsFactory {
           score,
         );
       case GameEventType.Penalty:
-        return this.createPenalty(game, gameEventType, gameEvent, daytime, elapsedSeconds);
+        return this.createPenalty(
+          game,
+          homeTeamMetadata,
+          awayTeamMetadata,
+          gameEventType,
+          gameEvent,
+          daytime,
+          elapsedSeconds,
+        );
       case GameEventType.Timeout:
-        return this.createTimeout(game, gameEventType, gameEvent, daytime, elapsedSeconds);
+        return this.createTimeout(
+          game,
+          homeTeamMetadata,
+          awayTeamMetadata,
+          gameEventType,
+          gameEvent,
+          daytime,
+          elapsedSeconds,
+        );
       case GameEventType.YellowCard:
-        return this.createYellowCard(game, gameEventType, gameEvent, daytime, elapsedSeconds);
+        return this.createYellowCard(
+          game,
+          homeTeamMetadata,
+          awayTeamMetadata,
+          gameEventType,
+          gameEvent,
+          daytime,
+          elapsedSeconds,
+        );
       case GameEventType.RedCard:
-        return this.createRedCard(game, gameEventType, gameEvent, daytime, elapsedSeconds);
+        return this.createRedCard(
+          game,
+          homeTeamMetadata,
+          awayTeamMetadata,
+          gameEventType,
+          gameEvent,
+          daytime,
+          elapsedSeconds,
+        );
     }
   };
 
   private createGameEventGoal = (
     game: Game,
+    homeTeamMetadata: TeamMetadata,
+    awayTeamMetadata: TeamMetadata,
     type: GameEventType.Goal,
     gameEvent: string,
     daytime: Date,
@@ -113,7 +168,7 @@ export class GameEventsFactory {
       .replace(gameEventIndicatorMap[GameEventType.Goal], '')
       .replace(playerNumberAndTeamRegexp, '')
       .trim();
-    const teamId = this.getTeamId(game, shortTeamName);
+    const teamId = this.getTeamId(homeTeamMetadata, awayTeamMetadata, shortTeamName);
     const playerId = this.getPlayerId(teamId, playerNumber, playerName);
 
     return {
@@ -131,6 +186,8 @@ export class GameEventsFactory {
 
   private createGameEventSevenMeters = (
     game: Game,
+    homeTeamMetadata: TeamMetadata,
+    awayTeamMetadata: TeamMetadata,
     type: GameEventType.SevenMeters,
     gameEvent: string,
     daytime: Date,
@@ -145,7 +202,7 @@ export class GameEventsFactory {
       .replace('Tor durch', '')
       .replace(playerNumberAndTeamRegexp, '')
       .trim();
-    const teamId = this.getTeamId(game, shortTeamName);
+    const teamId = this.getTeamId(homeTeamMetadata, awayTeamMetadata, shortTeamName);
     const playerId = this.getPlayerId(teamId, playerNumber, playerName);
 
     return {
@@ -164,6 +221,8 @@ export class GameEventsFactory {
 
   private createPenalty = (
     game: Game,
+    homeTeamMetadata: TeamMetadata,
+    awayTeamMetadata: TeamMetadata,
     type: GameEventType.Penalty,
     gameEvent: string,
     daytime: Date,
@@ -174,7 +233,7 @@ export class GameEventsFactory {
       .replace(gameEventIndicatorMap[GameEventType.Penalty], '')
       .replace(playerNumberAndTeamRegexp, '')
       .trim();
-    const teamId = this.getTeamId(game, shortTeamName);
+    const teamId = this.getTeamId(homeTeamMetadata, awayTeamMetadata, shortTeamName);
     const playerId = this.getPlayerId(teamId, playerNumber, playerName);
 
     return {
@@ -191,6 +250,8 @@ export class GameEventsFactory {
 
   private createTimeout = (
     game: Game,
+    homeTeamMetadata: TeamMetadata,
+    awayTeamMetadata: TeamMetadata,
     type: GameEventType.Timeout,
     gameEvent: string,
     daytime: Date,
@@ -199,7 +260,7 @@ export class GameEventsFactory {
     const shortTeamName = gameEvent
       .replace(gameEventIndicatorMap[GameEventType.Timeout], '')
       .trim();
-    const teamId = this.getTeamId(game, shortTeamName);
+    const teamId = this.getTeamId(homeTeamMetadata, awayTeamMetadata, shortTeamName);
 
     return {
       type,
@@ -214,6 +275,8 @@ export class GameEventsFactory {
 
   private createYellowCard = (
     game: Game,
+    homeTeamMetadata: TeamMetadata,
+    awayTeamMetadata: TeamMetadata,
     type: GameEventType.YellowCard,
     gameEvent: string,
     daytime: Date,
@@ -224,7 +287,7 @@ export class GameEventsFactory {
       .replace(gameEventIndicatorMap[GameEventType.YellowCard], '')
       .replace(playerNumberAndTeamRegexp, '')
       .trim();
-    const teamId = this.getTeamId(game, shortTeamName);
+    const teamId = this.getTeamId(homeTeamMetadata, awayTeamMetadata, shortTeamName);
     const playerId = this.getPlayerId(teamId, playerNumber, playerName);
 
     return {
@@ -241,6 +304,8 @@ export class GameEventsFactory {
 
   private createRedCard = (
     game: Game,
+    homeTeamMetadata: TeamMetadata,
+    awayTeamMetadata: TeamMetadata,
     type: GameEventType.RedCard,
     gameEvent: string,
     daytime: Date,
@@ -251,7 +316,7 @@ export class GameEventsFactory {
       .replace(gameEventIndicatorMap[GameEventType.RedCard], '')
       .replace(playerNumberAndTeamRegexp, '')
       .trim();
-    const teamId = this.getTeamId(game, shortTeamName);
+    const teamId = this.getTeamId(homeTeamMetadata, awayTeamMetadata, shortTeamName);
     const playerId = this.getPlayerId(teamId, playerNumber, playerName);
 
     return {
@@ -309,9 +374,13 @@ export class GameEventsFactory {
   private getGameEventId = (game: Game, type: GameEventType, elapsedSeconds: number): string =>
     getUuidByString(game.id + type + elapsedSeconds);
 
-  private getTeamId = (game: Game, shortTeamName: string): string =>
-    game.homeTeamId.includes(shortTeamName) ? game.homeTeamId : game.awayTeamId;
+  private getTeamId = (
+    homeTeamMetadata: TeamMetadata,
+    awayTeamMetadata: TeamMetadata,
+    shortTeamName: string,
+  ): string =>
+    homeTeamMetadata.name.includes(shortTeamName) ? homeTeamMetadata.id : awayTeamMetadata.id;
 
   private getPlayerId = (teamId: string, playerNumber: number, playerName: string): string =>
-    `${teamId} ${playerNumber} ${playerName}`;
+    getUuidByString(`${teamId} ${playerNumber} ${playerName}`);
 }

@@ -4,6 +4,7 @@ import { GameMetadataFactory } from 'games/game-metadata.factory';
 import { GamesService } from 'games/games.service';
 import { LeaguesService } from 'leagues/leagues.service';
 import PdfParse from 'pdf-parse';
+import { TeamsFactory } from 'teams/teams.factory';
 import { TeamsService } from 'teams/teams.service';
 
 const daytimePattern = /^\d{2}:\d{2}:\d{2}/;
@@ -13,6 +14,7 @@ export class PdfService {
   constructor(
     private gamesService: GamesService,
     private gameEventsService: GameEventsService,
+    private teamsFactory: TeamsFactory,
     private teamsService: TeamsService,
     private leaguesService: LeaguesService,
     private gameMetadataFactory: GameMetadataFactory,
@@ -24,10 +26,23 @@ export class PdfService {
 
     const gameMetadata = this.gameMetadataFactory.create(metadataStrings);
     const league = await this.leaguesService.createLeague(gameMetadata.date, metadataStrings);
-    const game = await this.gamesService.createGame(league.id, gameMetadata, metadataStrings);
+    const { homeTeam, awayTeam } = this.teamsFactory.createManyMetadata(league.id, teamDataStrings);
 
-    await this.gameEventsService.createManyGameEvents(gameEventStrings, game);
-    await this.teamsService.createManyTeams(league.id, teamDataStrings);
+    const game = await this.gamesService.createGame(
+      league.id,
+      gameMetadata,
+      homeTeam,
+      awayTeam,
+      metadataStrings,
+    );
+    const gameEvents = await this.gameEventsService.createManyGameEvents(
+      gameEventStrings,
+      game,
+      homeTeam,
+      awayTeam,
+    );
+
+    await this.teamsService.createManyTeams(homeTeam, awayTeam, game, gameEvents);
   }
 
   private extractGameStrings(pdfText: string): {
