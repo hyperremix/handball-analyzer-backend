@@ -54,7 +54,7 @@ export class PdfService {
 
     const metadataStartIndex = lines.findIndex((line) => line.includes('Übersicht Spieldaten'));
     const metadataEndIndex = lines.findIndex((line) => line.includes('Schiedsrichter'));
-    const metadataStrings = lines.slice(metadataStartIndex + 1, metadataEndIndex);
+    const metadataStrings = lines.slice(metadataStartIndex + 1, metadataEndIndex + 4);
 
     const teamDataStartIndex = lines.findIndex((line) => line.includes('Mannschaftslisten'));
     const teamDataEndIndex = lines.findIndex((line) =>
