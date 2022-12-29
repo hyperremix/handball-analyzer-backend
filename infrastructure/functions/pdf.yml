@@ -2,6 +2,6 @@ pdf:
   handler: dist/pdf.handler
   events:
     - s3:
-        bucket: ${env:AWS_S3_PDF_BUCKET}
+        bucket: ${self:provider.environment.AWS_S3_PDF_BUCKET}
         event: s3:ObjectCreated:*
         existing: true
