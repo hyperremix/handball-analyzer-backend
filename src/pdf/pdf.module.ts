@@ -5,11 +5,12 @@ import { LeaguesModule } from 'leagues/leagues.module';
 import { S3Module } from 's3/s3.module';
 import { TeamsModule } from 'teams/teams.module';
 import { PdfController } from './pdf.controller';
+import { PdfRepository } from './pdf.repository';
 import { PdfService } from './pdf.service';
 
 @Module({
   imports: [S3Module, TeamsModule, GamesModule, GameEventsModule, LeaguesModule],
   controllers: [PdfController],
-  providers: [PdfService],
+  providers: [PdfService, PdfRepository],
 })
 export class PdfModule {}

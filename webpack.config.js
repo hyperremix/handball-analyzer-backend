@@ -13,6 +13,7 @@ module.exports = (options, webpack) => {
     devtool: 'source-map',
     entry: {
       app: './src/app.ts',
+      pdf: './src/pdf/pdf-lambda.ts',
     },
     externals: ['pdf-parse'],
     optimization: {

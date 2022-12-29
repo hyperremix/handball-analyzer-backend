@@ -6,6 +6,7 @@ import { LeaguesService } from 'leagues/leagues.service';
 import PdfParse from 'pdf-parse';
 import { TeamsFactory } from 'teams/teams.factory';
 import { TeamsService } from 'teams/teams.service';
+import { PdfRepository } from './pdf.repository';
 
 const daytimePattern = /^\d{2}:\d{2}:\d{2}/;
 
@@ -18,7 +19,16 @@ export class PdfService {
     private teamsService: TeamsService,
     private leaguesService: LeaguesService,
     private gameMetadataFactory: GameMetadataFactory,
+    private pdfRepository: PdfRepository,
   ) {}
+
+  async pdfExists(key: string): Promise<boolean> {
+    const keyParts = key.split('_');
+    const id = keyParts[keyParts.length - 1];
+
+    const pdf = await this.pdfRepository.findOne({ id });
+    return !!pdf;
+  }
 
   async parsePdf(pdf: Buffer): Promise<void> {
     const { text } = await PdfParse(pdf);
@@ -43,6 +53,11 @@ export class PdfService {
     );
 
     await this.teamsService.createManyTeams(homeTeam, awayTeam, game, gameEvents);
+
+    await this.pdfRepository.upsert({
+      id: game.id,
+      parsedAt: new Date(),
+    });
   }
 
   private extractGameStrings(pdfText: string): {

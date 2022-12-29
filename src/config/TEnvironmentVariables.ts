@@ -11,6 +11,7 @@ export type TEnvironmentVariables = {
   GAMES_TABLE: string;
   GAME_EVENTS_TABLE: string;
   LEAGUES_TABLE: string;
+  PDF_TABLE: string;
   LEAGUE_ID_INDEX: string;
   LOGGER_FORMAT: LoggerFormat;
 };
