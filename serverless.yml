@@ -15,7 +15,7 @@ provider:
     GAMES_TABLE: '${self:service}-games-${opt:stage, self:provider.stage}'
     GAME_EVENTS_TABLE: '${self:service}-gameEvents-${opt:stage, self:provider.stage}'
     LEAGUES_TABLE: '${self:service}-leagues-${opt:stage, self:provider.stage}'
-    PDFS_TABLE: '${self:service}-pdfs-${opt:stage, self:provider.stage}'
+    PDF_TABLE: '${self:service}-pdfs-${opt:stage, self:provider.stage}'
     LEAGUE_ID_INDEX: 'leagueId-index'
   httpApi:
     cors:
@@ -78,6 +78,8 @@ package:
 
 functions:
   - ${file(infrastructure/functions/app.yml)}
+  - ${file(infrastructure/functions/pdf.yml)}
+  - ${file(infrastructure/functions/upload.yml)}
 
 resources:
   - ${file(infrastructure/resources/app.yml)}

@@ -22,12 +22,12 @@ export class PdfService {
     private pdfRepository: PdfRepository,
   ) {}
 
-  async pdfExists(key: string): Promise<boolean> {
-    const keyParts = key.split('_');
-    const id = keyParts[keyParts.length - 1];
+  async pdfAlreadyParsed(key: string): Promise<boolean> {
+    const keyParts = key.split('.');
+    const id = keyParts[0];
 
     const pdf = await this.pdfRepository.findOne({ id });
-    return !!pdf;
+    return !!pdf?.parsedAt;
   }
 
   async parsePdf(pdf: Buffer): Promise<void> {
@@ -54,8 +54,11 @@ export class PdfService {
 
     await this.teamsService.createManyTeams(homeTeam, awayTeam, game, gameEvents);
 
+    const currentPdf = await this.pdfRepository.findOne({ id: game.id });
+
     await this.pdfRepository.upsert({
       id: game.id,
+      s3UploadAt: currentPdf?.s3UploadAt ?? new Date(),
       parsedAt: new Date(),
     });
   }

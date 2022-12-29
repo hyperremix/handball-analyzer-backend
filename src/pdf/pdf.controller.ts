@@ -27,7 +27,7 @@ export class PdfController {
   }
 
   async handleS3CreationEvent(bucket: string, key: string): Promise<void> {
-    const pdfExists = await this.pdfService.pdfExists(key);
+    const pdfExists = await this.pdfService.pdfAlreadyParsed(key);
     if (pdfExists) {
       this.logger.info(`Skipping file ${bucket}/${key}. It has already been parsed`);
       return;

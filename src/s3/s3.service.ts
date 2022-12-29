@@ -14,4 +14,20 @@ export class S3Service {
       throw new Error(`Error getting object ${bucket}/${key}: ${error}`);
     }
   }
+
+  async upload(bucket: string, contentType: string, key: string, body: S3.Body): Promise<void> {
+    try {
+      await this.s3
+        .upload({
+          Bucket: bucket,
+          Key: key,
+          ContentType: contentType,
+          ACL: 'public-read',
+          Body: body,
+        })
+        .promise();
+    } catch (error) {
+      throw new Error(`Error uploading object ${bucket}/${key}: ${error}`);
+    }
+  }
 }

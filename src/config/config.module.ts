@@ -26,6 +26,7 @@ import { TEnvironmentVariables } from './TEnvironmentVariables';
         LOGGER_FORMAT: Joi.string()
           .valid(...Object.values(LoggerFormat))
           .default(LoggerFormat.string),
+        AWS_S3_PDF_BUCKET: Joi.string().required(),
       }),
     }),
   ],

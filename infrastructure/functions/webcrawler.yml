@@ -1,0 +1,10 @@
+upload:
+  handler: dist/upload.handler
+  timeout: ${env:AWS_LAMBDA_TIMEOUT_SECONDS}
+  events:
+    # run every day at 00:00 pm UTC
+    - schedule: cron(0 0 * * ? *)
+    # run every day at 08:00 pm UTC
+    - schedule: cron(0 20 * * ? *)
+    # run every day at 10:00 pm UTC
+    - schedule: cron(0 22 * * ? *)

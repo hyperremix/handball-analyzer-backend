@@ -4,6 +4,7 @@ import { ConfigModule } from 'config';
 import { DbModule } from 'db';
 import { ErrorInterceptor } from 'errors/error.interceptor';
 import { LoggerModule } from 'logger';
+import { UploadModule } from 'upload/upload.module';
 import { GameEventsModule } from './game-events/game-events.module';
 import { GamesModule } from './games/games.module';
 import { LeaguesModule } from './leagues/leagues.module';
@@ -26,6 +27,7 @@ import { TeamsModule } from './teams/teams.module';
     GamesModule,
     GameEventsModule,
     LeaguesModule,
+    UploadModule,
   ],
 })
 export class AppModule {}

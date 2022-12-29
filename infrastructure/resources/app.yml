@@ -107,7 +107,7 @@ Resources:
   PdfsTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: ${self:provider.environment.PDFS_TABLE}
+      TableName: ${self:provider.environment.PDF_TABLE}
       AttributeDefinitions:
         - AttributeName: id
           AttributeType: S

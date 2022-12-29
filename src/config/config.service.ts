@@ -15,6 +15,11 @@ export class ConfigService {
         timeoutSeconds: this.get('AWS_LAMBDA_TIMEOUT_SECONDS'),
       },
       region: this.get('AWS_REGION'),
+      s3: {
+        buckets: {
+          pdf: this.get('AWS_S3_PDF_BUCKET'),
+        },
+      },
     };
   }
 

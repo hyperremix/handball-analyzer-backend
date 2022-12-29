@@ -1,4 +1,5 @@
 export type Pdf = {
   id: string;
-  parsedAt: Date;
+  s3UploadAt: Date;
+  parsedAt?: Date;
 };

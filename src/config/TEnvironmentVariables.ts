@@ -14,4 +14,5 @@ export type TEnvironmentVariables = {
   PDF_TABLE: string;
   LEAGUE_ID_INDEX: string;
   LOGGER_FORMAT: LoggerFormat;
+  AWS_S3_PDF_BUCKET: string;
 };

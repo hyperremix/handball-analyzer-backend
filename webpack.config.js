@@ -14,6 +14,7 @@ module.exports = (options, webpack) => {
     entry: {
       app: './src/app.ts',
       pdf: './src/pdf/pdf-lambda.ts',
+      upload: './src/upload/upload-lambda.ts',
     },
     externals: ['pdf-parse'],
     optimization: {
