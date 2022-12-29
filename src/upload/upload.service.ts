@@ -20,11 +20,11 @@ export class UploadService {
       .map((pdf) => pdf.id)
       .reduce((acc, id) => acc.add(id), new Set());
 
-    const handball4allResponse = await axios.get<Handball4AllResponse>(
+    const handball4allResponse = await axios.get<Handball4AllResponse[]>(
       'https://spo.handball4all.de/service/if_g_json.php?ca=1&cl=95086&cmd=ps&og=81',
     );
 
-    for (const game of handball4allResponse.data.content.futureGames.games) {
+    for (const game of handball4allResponse.data[0].content.futureGames.games) {
       const gameNotPlayed =
         game.gHomeGoals === ' ' || (game.gHomeGoals === '0' && game.gGuestGoals === '0');
       if (alreadyParsedGameIds.has(game.gNo) || gameNotPlayed) {
