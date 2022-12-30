@@ -98,6 +98,9 @@ export class TeamsFactory {
         [GameEventType.SevenMeters]:
           existingTeam.stats.gameEvents[GameEventType.SevenMeters] +
           groupedGameEvents[GameEventType.SevenMeters],
+        [GameEventType.BlueCard]:
+          existingTeam.stats.gameEvents[GameEventType.BlueCard] +
+          groupedGameEvents[GameEventType.BlueCard],
         [GameEventType.RedCard]:
           existingTeam.stats.gameEvents[GameEventType.RedCard] +
           groupedGameEvents[GameEventType.RedCard],
@@ -125,6 +128,7 @@ export class TeamsFactory {
       [GameEventType.Goal]: 0,
       [GameEventType.Penalty]: 0,
       [GameEventType.SevenMeters]: 0,
+      [GameEventType.BlueCard]: 0,
       [GameEventType.RedCard]: 0,
       [GameEventType.YellowCard]: 0,
       [GameEventType.Timeout]: 0,

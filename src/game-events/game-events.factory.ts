@@ -1,6 +1,7 @@
 import {
   Game,
   GameEvent,
+  GameEventBlueCard,
   GameEventGoal,
   gameEventIndicatorMap,
   GameEventPenalty,
@@ -139,6 +140,16 @@ export class GameEventsFactory {
         );
       case GameEventType.RedCard:
         return this.createRedCard(
+          game,
+          homeTeamMetadata,
+          awayTeamMetadata,
+          gameEventType,
+          gameEvent,
+          daytime,
+          elapsedSeconds,
+        );
+      case GameEventType.BlueCard:
+        return this.createBlueCard(
           game,
           homeTeamMetadata,
           awayTeamMetadata,
@@ -312,6 +323,35 @@ export class GameEventsFactory {
     daytime: Date,
     elapsedSeconds: number,
   ): GameEventRedCard => {
+    const [playerNumber, shortTeamName] = this.createPlayerNumberAndTeam(gameEvent);
+    const playerName = gameEvent
+      .replace(gameEventIndicatorMap[GameEventType.RedCard], '')
+      .replace(playerNumberAndTeamRegexp, '')
+      .trim();
+    const teamId = this.getTeamId(homeTeamMetadata, awayTeamMetadata, shortTeamName);
+    const playerId = this.getPlayerId(teamId, playerNumber, playerName);
+
+    return {
+      type,
+      id: uuidv4(),
+      gameId: game.id,
+      leagueId: game.leagueId,
+      daytime,
+      elapsedSeconds,
+      playerId,
+      teamId,
+    };
+  };
+
+  private createBlueCard = (
+    game: Game,
+    homeTeamMetadata: TeamMetadata,
+    awayTeamMetadata: TeamMetadata,
+    type: GameEventType.BlueCard,
+    gameEvent: string,
+    daytime: Date,
+    elapsedSeconds: number,
+  ): GameEventBlueCard => {
     const [playerNumber, shortTeamName] = this.createPlayerNumberAndTeam(gameEvent);
     const playerName = gameEvent
       .replace(gameEventIndicatorMap[GameEventType.RedCard], '')
