@@ -173,7 +173,7 @@ export class GameEventsFactory {
 
     return {
       type,
-      id: this.getGameEventId(game, type, elapsedSeconds),
+      id: this.getGameEventId(game, type, elapsedSeconds, playerId),
       gameId: game.id,
       leagueId: game.leagueId,
       daytime,
@@ -207,7 +207,7 @@ export class GameEventsFactory {
 
     return {
       type,
-      id: this.getGameEventId(game, type, elapsedSeconds),
+      id: this.getGameEventId(game, type, elapsedSeconds, playerId),
       gameId: game.id,
       leagueId: game.leagueId,
       daytime,
@@ -238,7 +238,7 @@ export class GameEventsFactory {
 
     return {
       type,
-      id: this.getGameEventId(game, type, elapsedSeconds),
+      id: this.getGameEventId(game, type, elapsedSeconds, playerId),
       gameId: game.id,
       leagueId: game.leagueId,
       daytime,
@@ -292,7 +292,7 @@ export class GameEventsFactory {
 
     return {
       type,
-      id: this.getGameEventId(game, type, elapsedSeconds),
+      id: this.getGameEventId(game, type, elapsedSeconds, playerId),
       gameId: game.id,
       leagueId: game.leagueId,
       daytime,
@@ -321,7 +321,7 @@ export class GameEventsFactory {
 
     return {
       type,
-      id: this.getGameEventId(game, type, elapsedSeconds),
+      id: this.getGameEventId(game, type, elapsedSeconds, playerId),
       gameId: game.id,
       leagueId: game.leagueId,
       daytime,
@@ -371,8 +371,12 @@ export class GameEventsFactory {
     return [parseInt(playerAndTeam[0]), playerAndTeam[1]];
   };
 
-  private getGameEventId = (game: Game, type: GameEventType, elapsedSeconds: number): string =>
-    getUuidByString(game.id + type + elapsedSeconds);
+  private getGameEventId = (
+    game: Game,
+    type: GameEventType,
+    elapsedSeconds: number,
+    playerId?: string,
+  ): string => getUuidByString(game.id + type + elapsedSeconds + playerId);
 
   private getTeamId = (
     homeTeamMetadata: TeamMetadata,
