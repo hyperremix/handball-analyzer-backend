@@ -46,6 +46,11 @@ export class UploadService {
         `${game.gNo}.pdf`,
         pdfBuffer,
       );
+
+      await this.uploadRepository.upsert({
+        id: game.gNo,
+        s3UploadAt: new Date(),
+      });
     }
   }
 }
