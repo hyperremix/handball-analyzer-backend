@@ -36,6 +36,7 @@ export class ConfigService {
       },
       indices: {
         leagueId: this.get('LEAGUE_ID_INDEX'),
+        gameId: this.get('GAME_ID_INDEX'),
       },
     };
   }

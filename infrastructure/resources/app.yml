@@ -80,6 +80,8 @@ Resources:
           AttributeType: S
         - AttributeName: leagueId
           AttributeType: S
+        - AttributeName: gameId
+          AttributeType: S
       KeySchema:
         - AttributeName: id
           KeyType: HASH
@@ -87,6 +89,14 @@ Resources:
         - IndexName: ${self:provider.environment.LEAGUE_ID_INDEX}
           KeySchema:
             - AttributeName: leagueId
+              KeyType: HASH
+            - AttributeName: id
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: ${self:provider.environment.GAME_ID_INDEX}
+          KeySchema:
+            - AttributeName: gameId
               KeyType: HASH
             - AttributeName: id
               KeyType: RANGE

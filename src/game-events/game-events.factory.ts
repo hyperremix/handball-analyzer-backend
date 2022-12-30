@@ -13,6 +13,7 @@ import {
   TeamMetadata,
 } from '@model';
 import { Injectable } from '@nestjs/common';
+import { v4 as uuidv4 } from 'uuid';
 import getUuidByString from 'uuid-by-string';
 
 const daytimePattern = /^\d{2}:\d{2}:\d{2}/;
@@ -173,7 +174,7 @@ export class GameEventsFactory {
 
     return {
       type,
-      id: this.getGameEventId(game, type, elapsedSeconds, playerId),
+      id: uuidv4(),
       gameId: game.id,
       leagueId: game.leagueId,
       daytime,
@@ -207,7 +208,7 @@ export class GameEventsFactory {
 
     return {
       type,
-      id: this.getGameEventId(game, type, elapsedSeconds, playerId),
+      id: uuidv4(),
       gameId: game.id,
       leagueId: game.leagueId,
       daytime,
@@ -238,7 +239,7 @@ export class GameEventsFactory {
 
     return {
       type,
-      id: this.getGameEventId(game, type, elapsedSeconds, playerId),
+      id: uuidv4(),
       gameId: game.id,
       leagueId: game.leagueId,
       daytime,
@@ -264,7 +265,7 @@ export class GameEventsFactory {
 
     return {
       type,
-      id: this.getGameEventId(game, type, elapsedSeconds),
+      id: uuidv4(),
       gameId: game.id,
       leagueId: game.leagueId,
       daytime,
@@ -292,7 +293,7 @@ export class GameEventsFactory {
 
     return {
       type,
-      id: this.getGameEventId(game, type, elapsedSeconds, playerId),
+      id: uuidv4(),
       gameId: game.id,
       leagueId: game.leagueId,
       daytime,
@@ -321,7 +322,7 @@ export class GameEventsFactory {
 
     return {
       type,
-      id: this.getGameEventId(game, type, elapsedSeconds, playerId),
+      id: uuidv4(),
       gameId: game.id,
       leagueId: game.leagueId,
       daytime,
@@ -370,13 +371,6 @@ export class GameEventsFactory {
       : '';
     return [parseInt(playerAndTeam[0]), playerAndTeam[1]];
   };
-
-  private getGameEventId = (
-    game: Game,
-    type: GameEventType,
-    elapsedSeconds: number,
-    playerId?: string,
-  ): string => getUuidByString(game.id + type + elapsedSeconds + playerId);
 
   private getTeamId = (
     homeTeamMetadata: TeamMetadata,

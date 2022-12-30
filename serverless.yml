@@ -17,6 +17,7 @@ provider:
     LEAGUES_TABLE: '${self:service}-leagues-${opt:stage, self:provider.stage}'
     PDF_TABLE: '${self:service}-pdfs-${opt:stage, self:provider.stage}'
     LEAGUE_ID_INDEX: 'leagueId-index'
+    GAME_ID_INDEX: 'gameId-index'
   httpApi:
     cors:
       allowedOrigins:

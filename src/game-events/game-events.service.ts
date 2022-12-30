@@ -16,6 +16,13 @@ export class GameEventsService {
     homeTeamMetadata: TeamMetadata,
     awayTeamMetadata: TeamMetadata,
   ): Promise<GameEvent[]> {
+    const existingGameEvents = await this.gameEventsRepository.findManyByGameId(game.id);
+    if (existingGameEvents.length > 0) {
+      await this.gameEventsRepository.deleteManyById(
+        existingGameEvents.map((gameEvent) => gameEvent.id),
+      );
+    }
+
     const gameEvents = this.gameEventsFactory.createMany(
       game,
       homeTeamMetadata,

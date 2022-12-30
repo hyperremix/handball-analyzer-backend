@@ -12,4 +12,8 @@ export class GameEventsRepository extends BaseRepository<GameEvent> {
   async findManyByLeagueId(leagueId: string): Promise<GameEvent[]> {
     return await super.query({ leagueId }, this.configService.db.indices.leagueId);
   }
+
+  async findManyByGameId(gameId: string): Promise<GameEvent[]> {
+    return await super.query({ gameId }, this.configService.db.indices.gameId);
+  }
 }

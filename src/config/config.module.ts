@@ -23,6 +23,7 @@ import { TEnvironmentVariables } from './TEnvironmentVariables';
         LEAGUES_TABLE: Joi.string().required(),
         PDF_TABLE: Joi.string().required(),
         LEAGUE_ID_INDEX: Joi.string().required(),
+        GAME_ID_INDEX: Joi.string().required(),
         LOGGER_FORMAT: Joi.string()
           .valid(...Object.values(LoggerFormat))
           .default(LoggerFormat.string),

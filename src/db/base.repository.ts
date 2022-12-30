@@ -34,4 +34,8 @@ export abstract class BaseRepository<T extends { id: string }> {
   async deleteById(id: string): Promise<void> {
     await this.dynamoDBClient.delete(id);
   }
+
+  async deleteManyById(ids: string[]): Promise<void> {
+    await this.dynamoDBClient.batchDelete(ids);
+  }
 }
