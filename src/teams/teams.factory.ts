@@ -197,7 +197,9 @@ export class TeamsFactory {
   }
 
   mapToCoaches = (coachesStrings: string[]): string[] =>
-    coachesStrings.map((coachString) => coachString.slice(1)).filter((coach) => coach !== '');
+    coachesStrings
+      .map((coachString) => coachString.slice(1).replaceAll(/\d/g, '').replaceAll(':', ''))
+      .filter((coach) => coach !== '');
 
   mapToTeam = (teamString: string, leagueId: string, coaches: string[]): TeamMetadata => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
