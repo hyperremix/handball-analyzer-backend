@@ -15,6 +15,7 @@ export class PdfController {
 
   @Put('replay')
   async replay(@Body() { bucket, key }: { bucket: string; key: string }): Promise<void> {
+    // TODO: Replay needs to remove stats from teams before persisting them again
     this.logger.info(`Replaying file ${bucket}/${key}`);
     const s3Object = await this.s3Service.getObject(bucket, key);
 

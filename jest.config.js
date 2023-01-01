@@ -10,6 +10,9 @@ module.exports = {
   coverageDirectory: '../coverage',
   testEnvironment: 'node',
   moduleDirectories: ['node_modules', 'src'],
+  moduleNameMapper: {
+    '^@model(.*)$': '<rootDir>/src/libs/handball-analyzer-model$1',
+  },
   setupFiles: ['./src/jest-setup-file.ts'],
   globals: {
     'ts-jest': {

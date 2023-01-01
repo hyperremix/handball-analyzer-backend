@@ -416,8 +416,29 @@ export class GameEventsFactory {
     homeTeamMetadata: TeamMetadata,
     awayTeamMetadata: TeamMetadata,
     shortTeamName: string,
-  ): string =>
-    homeTeamMetadata.name.includes(shortTeamName) ? homeTeamMetadata.id : awayTeamMetadata.id;
+  ): string => {
+    const preparedHomeTeamName = homeTeamMetadata.name
+      .replaceAll(' ', '')
+      .replaceAll('-', '')
+      .replaceAll('/', '')
+      .toLowerCase();
+    const preparedAwayTeamName = awayTeamMetadata.name
+      .replaceAll(' ', '')
+      .replaceAll('-', '')
+      .replaceAll('/', '')
+      .toLowerCase();
+    const preparedShortTeamName = shortTeamName
+      .replaceAll(' ', '')
+      .replaceAll('-', '')
+      .replaceAll('/', '')
+      .toLowerCase();
+
+    return preparedHomeTeamName.includes(preparedShortTeamName)
+      ? homeTeamMetadata.id
+      : preparedAwayTeamName.includes(preparedShortTeamName)
+      ? awayTeamMetadata.id
+      : homeTeamMetadata.id;
+  };
 
   private getPlayerId = (teamId: string, playerNumber: number, playerName: string): string =>
     getUuidByString(`${teamId} ${playerNumber} ${playerName}`);

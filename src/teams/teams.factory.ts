@@ -72,13 +72,11 @@ export class TeamsFactory {
         (gameEvent) => gameEvent.type === GameEventType.SevenMeters,
       ) as GameEventSevenMeters[],
     );
+    const gameResult = this.getGameResult(game, teamMetadata.id);
 
     const newStats: Team['stats'] = {
       gameEvents: groupedGameEvents,
-      wins: game.winnerTeamId === teamMetadata.id ? 1 : 0,
-      losses: game.winnerTeamId !== teamMetadata.id ? 1 : 0,
-      draws: game.fulltimeScore.home === game.fulltimeScore.away ? 1 : 0,
-      points: game.winnerTeamId === teamMetadata.id ? 2 : 0,
+      ...gameResult,
       sevenMetersGoals: newSevenMetersGoals,
       concededGoals:
         teamMetadata.id === game.homeTeamId ? game.fulltimeScore.away : game.fulltimeScore.home,
@@ -117,9 +115,29 @@ export class TeamsFactory {
       wins: existingTeam.stats.wins + newStats.wins,
       losses: existingTeam.stats.losses + newStats.losses,
       draws: existingTeam.stats.draws + newStats.draws,
-      points: existingTeam.stats.points + newStats.points,
       sevenMetersGoals: existingTeam.stats.sevenMetersGoals + newSevenMetersGoals,
       concededGoals: existingTeam.stats.concededGoals + newStats.concededGoals,
+    };
+  }
+
+  getGameResult(game: Game, teamId: string): { wins: number; losses: number; draws: number } {
+    const result = {
+      wins: 0,
+      losses: 0,
+      draws: 0,
+    };
+
+    if (game.fulltimeScore.home === game.fulltimeScore.away) {
+      return {
+        ...result,
+        draws: 1,
+      };
+    }
+
+    return {
+      wins: game.winnerTeamId === teamId ? 1 : 0,
+      losses: game.winnerTeamId !== teamId ? 1 : 0,
+      draws: 0,
     };
   }
 
@@ -132,7 +150,6 @@ export class TeamsFactory {
       [GameEventType.RedCard]: 0,
       [GameEventType.YellowCard]: 0,
       [GameEventType.Timeout]: 0,
-      [GameEventType.Penalty]: 0,
     };
 
     gameEvents.forEach((gameEvent) => {
