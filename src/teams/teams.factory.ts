@@ -3,8 +3,9 @@ import {
   GameEvent,
   GameEventSevenMeters,
   GameEventType,
-  Player,
   Team,
+  TeamMember,
+  TeamMemberType,
   TeamMetadata,
 } from '@model';
 import { Injectable } from '@nestjs/common';
@@ -44,15 +45,11 @@ export class TeamsFactory {
     return {
       ...existingTeam,
       ...teamMetadata,
-      coaches: [
-        ...existingTeam.coaches,
-        ...teamMetadata.coaches.filter((coach) => !existingTeam.coaches.includes(coach)),
-      ],
-      players: [
-        ...existingTeam.players,
-        ...teamMetadata.players.filter(
+      teamMembers: [
+        ...existingTeam.teamMembers,
+        ...teamMetadata.teamMembers.filter(
           (player) =>
-            !existingTeam.players.some((existingPlayer) => existingPlayer.id === player.id),
+            !existingTeam.teamMembers.some((existingMember) => existingMember.id === player.id),
         ),
       ],
       stats: teamStats,
@@ -200,25 +197,38 @@ export class TeamsFactory {
       awayCoachesEndIndex + 1,
     );
 
-    const homeCoaches = this.mapToCoaches(homeCoachesStrings);
-    const awayCoaches = this.mapToCoaches(awayCoachesStrings);
-    const homeTeam = this.mapToTeam(homeTeamString, leagueId, homeCoaches);
-    const awayTeam = this.mapToTeam(awayTeamString, leagueId, awayCoaches);
+    const homeTeam = this.mapToTeam(homeTeamString, leagueId);
+    const awayTeam = this.mapToTeam(awayTeamString, leagueId);
+    const homeCoaches = this.mapToCoaches(homeCoachesStrings, homeTeam.id);
+    const awayCoaches = this.mapToCoaches(awayCoachesStrings, awayTeam.id);
     const homePlayers = this.mapToManyPlayers(homePlayerStrings, homeTeam.id);
     const awayPlayers = this.mapToManyPlayers(awayPlayerStrings, awayTeam.id);
 
-    homeTeam.players = homePlayers;
-    awayTeam.players = awayPlayers;
+    homeTeam.teamMembers = [...homePlayers, ...homeCoaches];
+    awayTeam.teamMembers = [...awayPlayers, ...awayCoaches];
 
     return { homeTeam, awayTeam };
   }
 
-  mapToCoaches = (coachesStrings: string[]): string[] =>
+  mapToCoaches = (coachesStrings: string[], teamId: string): TeamMember[] =>
     coachesStrings
-      .map((coachString) => coachString.slice(1).replaceAll(/\d/g, '').replaceAll(':', ''))
-      .filter((coach) => coach !== '');
+      .map((coachString) => {
+        const number = coachString.slice(0, 1);
+        if (number === '') {
+          return undefined;
+        }
 
-  mapToTeam = (teamString: string, leagueId: string, coaches: string[]): TeamMetadata => {
+        const name = coachString.slice(1).replaceAll(/\d/g, '').replaceAll(':', '');
+        return {
+          id: getUuidByString(`${teamId} ${number} ${name}`),
+          number,
+          name,
+          type: TeamMemberType.Coach,
+        };
+      })
+      .filter((coach) => coach !== undefined) as TeamMember[];
+
+  mapToTeam = (teamString: string, leagueId: string): TeamMetadata => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [_, name] = teamString.split(': ');
 
@@ -226,20 +236,19 @@ export class TeamsFactory {
       id: getUuidByString(`${leagueId} ${name}`),
       leagueId,
       name,
-      coaches,
-      players: [],
+      teamMembers: [],
     };
   };
 
-  mapToManyPlayers = (playerStrings: string[], teamId: string): Player[] =>
+  mapToManyPlayers = (playerStrings: string[], teamId: string): TeamMember[] =>
     playerStrings.map((playerString) => this.mapToPlayer(playerString, teamId));
 
-  mapToPlayer = (playerString: string, teamId: string): Player => {
+  mapToPlayer = (playerString: string, teamId: string): TeamMember => {
     const playerNumberRegex = /^\d{1,2}/;
     const playerNameRegex = /[^\d:/]+/;
 
     const numberMatch = playerString.match(playerNumberRegex);
-    const number = numberMatch ? parseInt(numberMatch[0]) : 0;
+    const number = numberMatch ? numberMatch[0] : 'N/A';
     const nameMatch = playerString.match(playerNameRegex);
     const name = nameMatch ? nameMatch[0] : 'N/A';
 
@@ -247,6 +256,7 @@ export class TeamsFactory {
       id: getUuidByString(`${teamId} ${number} ${name}`),
       name,
       number,
+      type: TeamMemberType.Player,
     };
   };
 }

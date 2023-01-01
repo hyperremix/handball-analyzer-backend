@@ -19,7 +19,7 @@ import getUuidByString from 'uuid-by-string';
 
 const daytimePattern = /^\d{2}:\d{2}:\d{2}/;
 const scoreRegexp = /\d{1,2}:\d{1,2}(?!m)/;
-const playerNumberAndTeamRegexp = /\(\d{1,2}, .*\)/;
+const playerNumberAndTeamRegexp = /\([\dABCD]{1,2}, .*\)/;
 
 @Injectable()
 export class GameEventsFactory {
@@ -404,12 +404,11 @@ export class GameEventsFactory {
       : undefined;
   };
 
-  private createPlayerNumberAndTeam = (gameEvent: string): [number, string] => {
+  private createPlayerNumberAndTeam = (gameEvent: string): [string, string] => {
     const playerAndTeamString = gameEvent.match(playerNumberAndTeamRegexp);
-    const playerAndTeam = playerAndTeamString
-      ? playerAndTeamString[0].replace('(', '').replace(')', '').split(', ')
-      : '';
-    return [parseInt(playerAndTeam[0]), playerAndTeam[1]];
+    const match = playerAndTeamString?.[0] ?? '';
+    const playerAndTeam = match.replace('(', '').replace(')', '').split(', ');
+    return [playerAndTeam[0], playerAndTeam[1]];
   };
 
   private getTeamId = (
@@ -440,6 +439,6 @@ export class GameEventsFactory {
       : homeTeamMetadata.id;
   };
 
-  private getPlayerId = (teamId: string, playerNumber: number, playerName: string): string =>
+  private getPlayerId = (teamId: string, playerNumber: string, playerName: string): string =>
     getUuidByString(`${teamId} ${playerNumber} ${playerName}`);
 }
