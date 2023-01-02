@@ -140,6 +140,7 @@ export class GamesFactory {
       return undefined;
     }
 
+    // TODO: Handle cases like "Hans Peter-Müller" or "Hans-Peter Müller"
     const secondCapitalLetterIndex = this.secondCapitalLetterIndex(part);
 
     if (secondCapitalLetterIndex === -1) {

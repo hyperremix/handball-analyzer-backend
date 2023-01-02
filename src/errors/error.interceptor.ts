@@ -44,11 +44,16 @@ export class ErrorInterceptor implements NestInterceptor {
             break;
           default:
             const [req] = context.getArgs();
-            this.logger.error(
-              `Error: ${error.message}. Additional info: req ${req.method} ${req.url} at ${
-                context.getClass().name
-              }.${context.getHandler().name}`,
-            );
+
+            if (error instanceof Error) {
+              this.logger.error(
+                `Error: ${error.message}. Additional info: req ${req.method} ${req.url} at ${
+                  context.getClass().name
+                }.${context.getHandler().name}`,
+                error.stack,
+              );
+            }
+
             break;
         }
 
