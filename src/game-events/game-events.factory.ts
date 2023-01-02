@@ -416,25 +416,19 @@ export class GameEventsFactory {
     awayTeamMetadata: TeamMetadata,
     shortTeamName: string,
   ): string => {
-    const preparedHomeTeamName = homeTeamMetadata.name
-      .replaceAll(' ', '')
-      .replaceAll('-', '')
-      .replaceAll('/', '')
-      .toLowerCase();
-    const preparedAwayTeamName = awayTeamMetadata.name
-      .replaceAll(' ', '')
-      .replaceAll('-', '')
-      .replaceAll('/', '')
-      .toLowerCase();
-    const preparedShortTeamName = shortTeamName
-      .replaceAll(' ', '')
-      .replaceAll('-', '')
-      .replaceAll('/', '')
-      .toLowerCase();
+    const noSpecialCharactersRegexp = /[^\s-\/]*/g;
 
-    return preparedHomeTeamName.includes(preparedShortTeamName)
+    const preparedHomeTeamName = homeTeamMetadata.name.match(noSpecialCharactersRegexp);
+    const preparedAwayTeamName = awayTeamMetadata.name.match(noSpecialCharactersRegexp);
+    const preparedShortTeamName = shortTeamName.match(noSpecialCharactersRegexp);
+
+    if (!preparedHomeTeamName || !preparedAwayTeamName || !preparedShortTeamName) {
+      return homeTeamMetadata.id;
+    }
+
+    return preparedHomeTeamName[0].toLowerCase().includes(preparedShortTeamName[0].toLowerCase())
       ? homeTeamMetadata.id
-      : preparedAwayTeamName.includes(preparedShortTeamName)
+      : preparedAwayTeamName[0].toLowerCase().includes(preparedShortTeamName[0].toLowerCase())
       ? awayTeamMetadata.id
       : homeTeamMetadata.id;
   };

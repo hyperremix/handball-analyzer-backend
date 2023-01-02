@@ -223,7 +223,7 @@ export class TeamsFactory {
           return undefined;
         }
 
-        const name = coachNameString.match(/[^\d:]/);
+        const name = coachNameString.match(/[^\d:]*/g);
         if (name === null) {
           return undefined;
         }
