@@ -218,11 +218,20 @@ export class TeamsFactory {
           return undefined;
         }
 
-        const name = coachString.slice(1).replaceAll(/\d/g, '').replaceAll(':', '');
+        const coachNameString = coachString.slice(1);
+        if (coachNameString === '' || coachNameString === undefined) {
+          return undefined;
+        }
+
+        const name = coachNameString.match(/[^\d:]/);
+        if (name === null) {
+          return undefined;
+        }
+
         return {
           id: getUuidByString(`${teamId} ${number} ${name}`),
           number,
-          name,
+          name: name[0],
           type: TeamMemberType.Coach,
         };
       })
