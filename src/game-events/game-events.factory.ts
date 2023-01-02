@@ -29,9 +29,11 @@ export class GameEventsFactory {
     awayTeamMetadata: TeamMetadata,
     gameEventStrings: string[],
   ): GameEvent[] {
-    return gameEventStrings.map((gameEventString: any) =>
-      this.create(game, homeTeamMetadata, awayTeamMetadata, gameEventString),
-    );
+    return gameEventStrings
+      .map((gameEventString: any) =>
+        this.create(game, homeTeamMetadata, awayTeamMetadata, gameEventString),
+      )
+      .filter((gameEvent) => !!gameEvent) as GameEvent[];
   }
 
   create(
@@ -39,7 +41,7 @@ export class GameEventsFactory {
     homeTeamMetadata: TeamMetadata,
     awayTeamMetadata: TeamMetadata,
     gameEvent: string,
-  ): GameEvent {
+  ): GameEvent | undefined {
     const daytime = this.createDaytime(game.date, gameEvent);
     const eventWithoutDaytime = gameEvent.replace(daytimePattern, '').trim();
     const elapsedSeconds = this.createElapsedSeconds(eventWithoutDaytime.substring(0, 5));
@@ -66,7 +68,7 @@ export class GameEventsFactory {
       }
     }
 
-    throw new Error(`Could not create game event: ${gameEvent}`);
+    return;
   }
 
   private createGameEvent = (
@@ -170,12 +172,16 @@ export class GameEventsFactory {
     daytime: Date,
     elapsedSeconds: number,
     score?: GameScore,
-  ): GameEventGoal => {
+  ): GameEventGoal | undefined => {
     if (!score) {
       throw new Error(`Could not create score from game event: ${gameEvent}`);
     }
 
     const [playerNumber, shortTeamName] = this.createPlayerNumberAndTeam(gameEvent);
+    if (!playerNumber || !shortTeamName) {
+      return;
+    }
+
     const playerName = gameEvent
       .replace(gameEventIndicatorMap[GameEventType.Goal], '')
       .replace(playerNumberAndTeamRegexp, '')
@@ -205,9 +211,13 @@ export class GameEventsFactory {
     daytime: Date,
     elapsedSeconds: number,
     score?: GameScore,
-  ): GameEventSevenMeters => {
+  ): GameEventSevenMeters | undefined => {
     const isGoal = !gameEvent.includes('KEIN');
     const [playerNumber, shortTeamName] = this.createPlayerNumberAndTeam(gameEvent);
+    if (!playerNumber || !shortTeamName) {
+      return;
+    }
+
     const playerName = gameEvent
       .replace('7m, KEIN', '')
       .replace('7m-', '')
@@ -239,8 +249,12 @@ export class GameEventsFactory {
     gameEvent: string,
     daytime: Date,
     elapsedSeconds: number,
-  ): GameEventPenalty => {
+  ): GameEventPenalty | undefined => {
     const [playerNumber, shortTeamName] = this.createPlayerNumberAndTeam(gameEvent);
+    if (!playerNumber || !shortTeamName) {
+      return;
+    }
+
     const playerName = gameEvent
       .replace(gameEventIndicatorMap[GameEventType.Penalty], '')
       .replace(playerNumberAndTeamRegexp, '')
@@ -268,10 +282,14 @@ export class GameEventsFactory {
     gameEvent: string,
     daytime: Date,
     elapsedSeconds: number,
-  ): GameEventTimeout => {
+  ): GameEventTimeout | undefined => {
     const shortTeamName = gameEvent
       .replace(gameEventIndicatorMap[GameEventType.Timeout], '')
       .trim();
+    if (!shortTeamName) {
+      return;
+    }
+
     const teamId = this.getTeamId(homeTeamMetadata, awayTeamMetadata, shortTeamName);
 
     return {
@@ -293,8 +311,12 @@ export class GameEventsFactory {
     gameEvent: string,
     daytime: Date,
     elapsedSeconds: number,
-  ): GameEventYellowCard => {
+  ): GameEventYellowCard | undefined => {
     const [playerNumber, shortTeamName] = this.createPlayerNumberAndTeam(gameEvent);
+    if (!playerNumber || !shortTeamName) {
+      return;
+    }
+
     const playerName = gameEvent
       .replace(gameEventIndicatorMap[GameEventType.YellowCard], '')
       .replace(playerNumberAndTeamRegexp, '')
@@ -322,8 +344,12 @@ export class GameEventsFactory {
     gameEvent: string,
     daytime: Date,
     elapsedSeconds: number,
-  ): GameEventRedCard => {
+  ): GameEventRedCard | undefined => {
     const [playerNumber, shortTeamName] = this.createPlayerNumberAndTeam(gameEvent);
+    if (!playerNumber || !shortTeamName) {
+      return;
+    }
+
     const playerName = gameEvent
       .replace(gameEventIndicatorMap[GameEventType.RedCard], '')
       .replace(playerNumberAndTeamRegexp, '')
@@ -351,8 +377,12 @@ export class GameEventsFactory {
     gameEvent: string,
     daytime: Date,
     elapsedSeconds: number,
-  ): GameEventBlueCard => {
+  ): GameEventBlueCard | undefined => {
     const [playerNumber, shortTeamName] = this.createPlayerNumberAndTeam(gameEvent);
+    if (!playerNumber || !shortTeamName) {
+      return;
+    }
+
     const playerName = gameEvent
       .replace(gameEventIndicatorMap[GameEventType.RedCard], '')
       .replace(playerNumberAndTeamRegexp, '')
@@ -404,7 +434,7 @@ export class GameEventsFactory {
       : undefined;
   };
 
-  private createPlayerNumberAndTeam = (gameEvent: string): [string, string] => {
+  private createPlayerNumberAndTeam = (gameEvent: string): [string?, string?] => {
     const playerAndTeamString = gameEvent.match(playerNumberAndTeamRegexp);
     const match = playerAndTeamString?.[0] ?? '';
     const playerAndTeam = match.replace('(', '').replace(')', '').split(', ');
