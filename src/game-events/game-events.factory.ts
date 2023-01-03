@@ -14,6 +14,7 @@ import {
   TeamMetadata,
 } from '@model';
 import { Injectable } from '@nestjs/common';
+import { isStringSimilar } from 'utils/isStringSimilar';
 import { v4 as uuidv4 } from 'uuid';
 import getUuidByString from 'uuid-by-string';
 
@@ -446,21 +447,10 @@ export class GameEventsFactory {
     awayTeamMetadata: TeamMetadata,
     shortTeamName: string,
   ): string => {
-    const noSpecialCharactersRegexp = /[^\s-\/]*/g;
+    const isSimilarToHomeTeam = isStringSimilar(homeTeamMetadata.name, shortTeamName);
+    const isSimilarToAwayTeam = isStringSimilar(awayTeamMetadata.name, shortTeamName);
 
-    const preparedHomeTeamName = homeTeamMetadata.name.match(noSpecialCharactersRegexp);
-    const preparedAwayTeamName = awayTeamMetadata.name.match(noSpecialCharactersRegexp);
-    const preparedShortTeamName = shortTeamName.match(noSpecialCharactersRegexp);
-
-    if (!preparedHomeTeamName || !preparedAwayTeamName || !preparedShortTeamName) {
-      return homeTeamMetadata.id;
-    }
-
-    return preparedHomeTeamName[0].toLowerCase().includes(preparedShortTeamName[0].toLowerCase())
-      ? homeTeamMetadata.id
-      : preparedAwayTeamName[0].toLowerCase().includes(preparedShortTeamName[0].toLowerCase())
-      ? awayTeamMetadata.id
-      : homeTeamMetadata.id;
+    return isSimilarToHomeTeam > isSimilarToAwayTeam ? homeTeamMetadata.id : awayTeamMetadata.id;
   };
 
   private getPlayerId = (teamId: string, playerNumber: string, playerName: string): string =>

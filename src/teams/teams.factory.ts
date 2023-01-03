@@ -223,15 +223,12 @@ export class TeamsFactory {
           return undefined;
         }
 
-        const name = coachNameString.match(/[^\d:]*/g);
-        if (name === null) {
-          return undefined;
-        }
+        const name = coachNameString.replace(/[\d:]*/g, '');
 
         return {
           id: getUuidByString(`${teamId} ${number} ${name}`),
           number,
-          name: name[0],
+          name: name,
           type: TeamMemberType.Coach,
         };
       })
