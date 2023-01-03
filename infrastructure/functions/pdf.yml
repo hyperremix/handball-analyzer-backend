@@ -1,5 +1,6 @@
 pdf:
   handler: dist/pdf.handler
+  timeout: ${env:AWS_LAMBDA_TIMEOUT_SECONDS}
   events:
     - s3:
         bucket: ${self:provider.environment.AWS_S3_PDF_BUCKET}

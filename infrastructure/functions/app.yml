@@ -1,5 +1,6 @@
 app:
   handler: dist/app.handler
+  timeout: ${env:AWS_LAMBDA_TIMEOUT_SECONDS}
   events:
     - httpApi:
         method: 'GET'
