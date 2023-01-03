@@ -14,17 +14,19 @@ export class PdfController {
   }
 
   @Put('replay')
-  async replay(@Body() { bucket, key }: { bucket: string; key: string }): Promise<void> {
-    // TODO: Replay needs to remove stats from teams before persisting them again
-    this.logger.info(`Replaying file ${bucket}/${key}`);
-    const s3Object = await this.s3Service.getObject(bucket, key);
+  async replay(@Body() { bucket, keys }: { bucket: string; keys: string[] }): Promise<void> {
+    for (const key of keys) {
+      // TODO: Replay needs to remove stats from teams before persisting them again
+      this.logger.info(`Replaying file ${bucket}/${key}`);
+      const s3Object = await this.s3Service.getObject(bucket, key);
 
-    const pdfBuffer = s3Object.Body as Buffer;
-    if (!pdfBuffer) {
-      throw new Error(`No body found for ${bucket}/${key}`);
+      const pdfBuffer = s3Object.Body as Buffer;
+      if (!pdfBuffer) {
+        throw new Error(`No body found for ${bucket}/${key}`);
+      }
+
+      await this.pdfService.parsePdf(pdfBuffer);
     }
-
-    await this.pdfService.parsePdf(pdfBuffer);
   }
 
   async handleS3CreationEvent(bucket: string, key: string): Promise<void> {
