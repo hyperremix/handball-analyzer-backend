@@ -11,7 +11,7 @@ jobs:
       LOGGER_FORMAT: json
       NO_COLOR: true
       TZ: Europe/Berlin
-      AWS_LAMBDA_TIMEOUT_SECONDS: 15
+      AWS_LAMBDA_TIMEOUT_SECONDS: 30
     steps:
       - uses: actions/checkout@v3
         with:
